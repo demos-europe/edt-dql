@@ -1,0 +1,39 @@
+{
+    "name": "demos-europe/edt-dql",
+    "description": "Extension for demos-europe/edt-queries to use Doctrine ORM as data source.",
+    "license": "MIT",
+    "type": "library",
+    "require": {
+        "doctrine/orm": "^2.5",
+        "php": ">=7.3,<8.2",
+        "demos-europe/edt-queries": "^0.7"
+    },
+    "authors": [
+        {
+            "name": "Christian Dressler",
+            "email": "dressler@demos-deutschland.de"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "EDT\\DqlQuerying\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "doctrine/cache": "^1.11",
+        "phpstan/phpstan": "^0.12.54",
+        "phpstan/phpstan-strict-rules": "^0.12.5",
+        "vimeo/psalm": "^4.1",
+        "repman-io/composer-plugin": "^1.1"
+    },
+    "conflict": {
+        "demos-europe/edt-extra": "<0.6.0",
+        "demos-europe/edt-access-definitions": "<0.6.0",
+        "demos-europe/edt-paths": "<0.6.0"
+    }
+}
