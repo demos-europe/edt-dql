@@ -7,10 +7,10 @@ namespace Tests\DqlQuerying\Utilities;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Tools\Setup;
-use EDT\DqlQuerying\Utilities\DeepClassMetadata;
 use EDT\DqlQuerying\Utilities\JoinFinder;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -23,14 +23,13 @@ class JoinFinderTest extends TestCase
      */
     protected $joinFinder;
     /**
-     * @var DeepClassMetadata
+     * @var ClassMetadata
      */
     private $bookMetadata;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->joinFinder = new JoinFinder();
         $config = Setup::createAnnotationMetadataConfiguration(
             [__DIR__.'/tests/Model'],
             true,
@@ -48,16 +47,10 @@ class JoinFinderTest extends TestCase
             'path' => __DIR__ . '/db.sqlite',
         ];
         $entityManager = EntityManager::create($conn, $config);
-        $this->bookMetadata = new DeepClassMetadata(
-            $entityManager->getClassMetadata(Book::class),
-            $entityManager->getMetadataFactory()
-        );
-        $bookMetadata = $entityManager->getClassMetadata(Book::class);
-        if (!$bookMetadata->hasAssociation('author')) {
-            throw new InvalidArgumentException('Doctrine setup seems incorrect');
-        }
+        $this->bookMetadata = $entityManager->getClassMetadata(Book::class);
+        $this->joinFinder = new JoinFinder($entityManager->getMetadataFactory());
         if (!$this->bookMetadata->hasAssociation('author')) {
-            throw new InvalidArgumentException('Class impl seems incorrect');
+            throw new InvalidArgumentException('Class impl or Doctrine setup seems incorrect');
         }
     }
 

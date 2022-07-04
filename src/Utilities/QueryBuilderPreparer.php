@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\Utilities;
 
+use Doctrine\ORM\Mapping\ClassMetadataFactory;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Query\Expr\Composite;
 use Doctrine\ORM\Query\Expr\Math;
 use EDT\DqlQuerying\Contracts\ClauseInterface;
@@ -16,6 +18,7 @@ use EDT\DqlQuerying\Contracts\MappingException;
 use EDT\DqlQuerying\Contracts\OrderByInterface;
 use EDT\Querying\Contracts\PropertyPathAccessInterface;
 use EDT\Querying\Utilities\Iterables;
+use function count;
 
 class QueryBuilderPreparer
 {
@@ -45,7 +48,7 @@ class QueryBuilderPreparer
     private $parameters = [];
 
     /**
-     * @var DeepClassMetadata
+     * @var ClassMetadataInfo
      */
     private $classMetadata;
 
@@ -67,14 +70,14 @@ class QueryBuilderPreparer
      * given group. The joins required to limit the result will be automatically generated
      * using the group and entity definition.
      *
-     * @param DeepClassMetadata $classMetadata Provides all needed information to
-     *                                                        choose the correct entity type and
-     *                                                        mappings to translate the group
-     *                                                        into DQL data.
+     * @param ClassMetadataInfo $classMetadata Provides all needed information to
+     *                                         choose the correct entity type and
+     *                                         mappings to translate the group
+     *                                         into DQL data.
      */
-    public function __construct(DeepClassMetadata $classMetadata)
+    public function __construct(ClassMetadataInfo $classMetadata, ClassMetadataFactory $metadataFactory)
     {
-        $this->joinFinder = new JoinFinder();
+        $this->joinFinder = new JoinFinder($metadataFactory);
         $this->classMetadata = $classMetadata;
     }
 
@@ -194,7 +197,9 @@ class QueryBuilderPreparer
 
             // As there were joins needed to access the property the accessed entity is now the last
             // join determined above.
-            $entityAlias = array_pop($neededJoins)->getAlias();
+            /** @var Join $lastJoin */
+            $lastJoin = array_pop($neededJoins);
+            $entityAlias = $lastJoin->getAlias();
 
             // If the condition needs to access a property directly on the entity we append the
             // property name to the entity alias.
@@ -216,7 +221,7 @@ class QueryBuilderPreparer
 
         // If no joins are needed for this condition we can simply use the root entity alias with
         // the accessed property appended.
-        return "{$this->classMetadata->getTableName()}.{$lastProperty}";
+        return "{$this->classMetadata->getTableName()}.$lastProperty";
     }
 
     /**

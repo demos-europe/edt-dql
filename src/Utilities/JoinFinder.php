@@ -4,12 +4,26 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\Utilities;
 
+use Doctrine\ORM\Mapping\ClassMetadataFactory;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\MappingException as OrmMappingException;
 use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
 use EDT\DqlQuerying\Contracts\MappingException;
 use InvalidArgumentException;
 
 class JoinFinder
 {
+    /**
+     * @var ClassMetadataFactory
+     */
+    private $metadataFactory;
+
+    public function __construct(ClassMetadataFactory $metadataFactory)
+    {
+        $this->metadataFactory = $metadataFactory;
+    }
+
     /**
      * Find the joins needed for the actual 'where' expression from the property path.
      * The joins will be retrieved from the given entity definition. However
@@ -29,8 +43,7 @@ class JoinFinder
      * different paths:
      * * `t_d18ab622_authors` in case of a join to the `authors` of a `Book` entity
      *
-     * @param DeepClassMetadata $classMetadata
-     * @param string[]          $path
+     * @param string[] $path
      *
      * @return array<string, Join>|Join[] The needed joins. The key will be the alias of
      *                       {@link Join::getAlias()} to ensure uniqueness of the joins returned.
@@ -40,7 +53,7 @@ class JoinFinder
      *                       of returned joins is equal to the length of the provided path.
      * @throws MappingException
      */
-    public function findNecessaryJoins(string $salt, DeepClassMetadata $classMetadata, array $path): array
+    public function findNecessaryJoins(string $salt, ClassMetadataInfo $classMetadata, array $path): array
     {
         if ([] === $path) {
             return [];
@@ -52,17 +65,21 @@ class JoinFinder
      * @return array<int,Join>
      * @throws MappingException
      */
-    private function findJoinsRecursive(string $salt, DeepClassMetadata $classMetadata, string $previousPathHash, string $currentPathPart, string ...$morePathParts): array
+    private function findJoinsRecursive(string $salt, ClassMetadataInfo $classMetadata, string $previousPathHash, string $currentPathPart, string ...$morePathParts): array
     {
-        if (!$classMetadata->hasField($currentPathPart)) {
+        $isAttribute = $classMetadata->hasField($currentPathPart);
+        $isRelationship = $classMetadata->hasAssociation($currentPathPart);
+
+        if (!$isAttribute && !$isRelationship) {
             throw new InvalidArgumentException("Current property '$currentPathPart' was not found in entity '{$classMetadata->getName()}'");
         }
 
-        if ($classMetadata->hasAssociation($currentPathPart)) {
+        if ($isRelationship) {
             $currentAliasPrefix = $this->getPathHash($salt, $currentPathPart, $previousPathHash);
-            $targetClassMetadata = $classMetadata->getTargetClassMetadata($currentPathPart);
-            $relationshipAlias = "{$currentAliasPrefix}{$targetClassMetadata->getTableName()}";
-            $join = "{$previousPathHash}{$classMetadata->getTableName()}.{$currentPathPart}";
+            $targetClassMetadata = $this->getTargetClassMetadata($currentPathPart, $classMetadata);
+            $tableName = $targetClassMetadata->getTableName();
+            $relationshipAlias = "$currentAliasPrefix$tableName";
+            $join = "$previousPathHash$tableName.$currentPathPart";
             $neededJoin = new Join(Join::LEFT_JOIN, $join, $relationshipAlias);
 
             if ([] === $morePathParts) {
@@ -71,7 +88,7 @@ class JoinFinder
 
             $additionallyNeededJoins = $this->findJoinsRecursive(
                 $salt,
-                $classMetadata->getTargetClassMetadata($currentPathPart),
+                $targetClassMetadata,
                 $currentAliasPrefix,
                 ...$morePathParts
             );
@@ -98,5 +115,24 @@ class JoinFinder
     protected function getPathHash(string $salt, string $currentPathPart, string $previousPathHash): string
     {
         return "t{$salt}_".hash('crc32b', $previousPathHash.$currentPathPart).'_';
+    }
+
+    /**
+     * @throws MappingException
+     */
+    protected function getTargetClassMetadata(string $relationshipName, ClassMetadataInfo $metadata): ClassMetadataInfo
+    {
+        try {
+            $entityClass = $metadata->getAssociationTargetClass($relationshipName);
+            $classMetadata = $this->metadataFactory->getMetadataFor($entityClass);
+            if (!$classMetadata instanceof ClassMetadataInfo) {
+                $type = get_class($classMetadata);
+                throw new InvalidArgumentException("Expected ClassMetadataInfo, got $type");
+            }
+
+            return $classMetadata;
+        } catch (OrmMappingException | PersistenceMappingException | \ReflectionException $e) {
+            throw MappingException::relationshipUnavailable($relationshipName, $metadata->getName(), $e);
+        }
     }
 }
