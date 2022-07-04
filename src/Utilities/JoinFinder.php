@@ -77,8 +77,9 @@ class JoinFinder
         if ($isRelationship) {
             $currentAliasPrefix = $this->getPathHash($salt, $currentPathPart, $previousPathHash);
             $targetClassMetadata = $this->getTargetClassMetadata($currentPathPart, $classMetadata);
-            $tableName = $targetClassMetadata->getTableName();
-            $relationshipAlias = "$currentAliasPrefix$tableName";
+            $tableName = $classMetadata->getTableName();
+            $targetTableName = $targetClassMetadata->getTableName();
+            $relationshipAlias = "$currentAliasPrefix$targetTableName";
             $join = "$previousPathHash$tableName.$currentPathPart";
             $neededJoin = new Join(Join::LEFT_JOIN, $join, $relationshipAlias);
 
