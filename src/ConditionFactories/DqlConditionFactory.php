@@ -30,6 +30,7 @@ use EDT\Querying\Contracts\FunctionInterface;
 use EDT\Querying\Contracts\PathException;
 use EDT\Querying\Contracts\PropertyPathAccessInterface;
 use EDT\Querying\PropertyPaths\PropertyPath;
+use function count;
 
 class DqlConditionFactory implements ConditionFactoryInterface
 {
@@ -68,7 +69,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
 
     /**
      * @param ClauseFunctionInterface<bool> $firstFunction
-     * @param ClauseFunctionInterface<bool>                                       ...$additionalFunctions
+     * @param ClauseFunctionInterface<bool> ...$additionalFunctions
      *
      * @return ClauseFunctionInterface<bool>
      */
@@ -283,13 +284,79 @@ class DqlConditionFactory implements ConditionFactoryInterface
         );
     }
 
+    /**
+     * This class generates conditions that can be converted to DQL and thus are logically
+     * based on the relational model.
+     *
+     * Because a condition needs all information in a single row, we need to create a separate
+     * join for each required value. To clarify this, consider the following tables, continuing
+     * the example in {@link ConditionFactoryInterface::allValuesPresentInMemberListProperties()}:
+     *
+     * ```
+     * author
+     * | author_id | author_name |
+     * |-----------|-------------|
+     * |         1 |         Joe |
+     * |         2 |         Bob |
+     *
+     * book
+     * | author_id | book_title |
+     * |-----------|------------|
+     * |         1 |          A |
+     * |         1 |          B |
+     * |         1 |          C |
+     * |         2 |          A |
+     * |         2 |          C |
+     * ```
+     *
+     * We want to retrieve the authors that wrote books with the titles `A` *and* `B`. To get
+     * all titles for the condition into a single row we need to execute as many joins from the
+     * `author` table to the `book` table as there are values to check for. In this example we
+     * need two joins to the `book` table. One for `A` (`book_title_0`) and one for `B`
+     * (`book_title_1`), resulting in the following:
+     *
+     * ```
+     * author_book_join
+     * | author_id | author_name | book_title_0 | book_title_1 |
+     * |-----------|-------------|--------------|--------------|
+     * |         1 |         Joe |            A |            A |
+     * |         1 |         Joe |            A |            B |
+     * |         1 |         Joe |            A |            C |
+     * |         1 |         Joe |            B |            A |
+     * |         1 |         Joe |            B |            B |
+     * |         1 |         Joe |            B |            C |
+     * |         1 |         Joe |            C |            A |
+     * |         1 |         Joe |            C |            B |
+     * |         1 |         Joe |            C |            C |
+     * |         2 |         Bob |            A |            A |
+     * |         2 |         Bob |            A |            C |
+     * |         2 |         Bob |            C |            A |
+     * |         2 |         Bob |            C |            C |
+     * ```
+     *
+     * Based on this we can generate a condition that results in
+     * `… WHERE book_title_0 = 'A' AND book_title_1 = 'B'`, which matches only `Joe`,
+     * as it should be.
+     */
     public function allValuesPresentInMemberListProperties(array $values, string $property, string ...$properties): FunctionInterface
     {
+        // When building the DQL joins duplications will be avoided by default. I.e. if the
+        // same property path is used in multiple conditions the corresponding join is
+        // created only once and all conditions using the same path would access the same value
+        // when executed on a row. However, this is not what we want here. We want to create
+        // a separate join and corresponding condition for each given value. By setting a different
+        // salt for each PropertyPath they will result in separate joins to different columns, even
+        // though they are all based on the same given property path.
         $propertyPaths = PropertyPath::createIndexSaltedPaths(count($values), PropertyPath::DIRECT, $property, ...$properties);
+        // Each $propertyPath now corresponds to a different value in $values and accesses a
+        // different column as explained above. Hence, we can create a separate condition for each
+        // one, each being responsible for a single value in $values.
         $equalityConditions = array_map(static function ($value, PropertyPathAccessInterface $propertyPath): AllEqual {
             return new AllEqual(new Property($propertyPath), new Value($value));
         }, $values, $propertyPaths);
 
+        // Because we want to check if *all* values are present, we combine the created conditions
+        // via a logical `AND` operator.
         return new AllTrue(...$equalityConditions);
     }
 

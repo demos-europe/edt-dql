@@ -18,6 +18,7 @@ use EDT\DqlQuerying\Contracts\MappingException;
 use EDT\DqlQuerying\Contracts\OrderByInterface;
 use EDT\Querying\Contracts\PropertyPathAccessInterface;
 use EDT\Querying\Utilities\Iterables;
+use function array_slice;
 use function count;
 
 class QueryBuilderPreparer
@@ -30,7 +31,7 @@ class QueryBuilderPreparer
     /**
      * The alias of each join must be unique in the array.
      *
-     * Will be filled while creating the {@link whereExpression}.
+     * Will be filled while {@link QueryBuilderPreparer::processClause() processing the clauses}.
      *
      * @var array<string,Join>
      */
