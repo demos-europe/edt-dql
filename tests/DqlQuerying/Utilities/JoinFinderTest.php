@@ -14,7 +14,7 @@ use Doctrine\ORM\Tools\Setup;
 use EDT\DqlQuerying\Utilities\JoinFinder;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use Tests\data\Model\Book;
+use Tests\data\DqlModel\Book;
 
 class JoinFinderTest extends TestCase
 {

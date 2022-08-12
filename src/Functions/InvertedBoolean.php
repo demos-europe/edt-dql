@@ -9,6 +9,8 @@ use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 
 /**
  * @template-implements ClauseFunctionInterface<bool>
+ *
+ * @internal this implementation is not usable for to-many relationships
  */
 class InvertedBoolean extends \EDT\Querying\Functions\InvertedBoolean implements ClauseFunctionInterface
 {

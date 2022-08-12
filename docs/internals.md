@@ -17,7 +17,7 @@ Take as an example the following query building:
 ```php
 use EDT\DqlQuerying\ConditionFactories\DqlConditionFactory;
 use EDT\DqlQuerying\Utilities\QueryGenerator;
-use \Tests\data\Model\Book;
+use \Tests\data\DqlModel\Book;
 $authorName = 'Charles Dickens';
 $queryGenerator = new QueryGenerator($this->getEntityManager());
 $conditionFactory = new DqlConditionFactory();
@@ -33,7 +33,7 @@ The target of both equality conditions is the `name` property in the `Person` en
 **Without** prefixing the resulting query is similar to the DQL resulting from the following, manually created query:
 
 ```php
-use \Tests\data\Model\Book;
+use \Tests\data\DqlModel\Book;
 $queryBuilder = $this->getEntityManager()->createQueryBuilder()
     ->select('Book')
     ->from(Book::class, 'Book')
@@ -51,7 +51,7 @@ To differentiate the paths we generate prefixes for the entity aliases.
 The actually generated DQL is thus similar to the following:
 
 ```php
-use \Tests\data\Model\Book;
+use \Tests\data\DqlModel\Book;
 $queryBuilder = $this->getEntityManager()->createQueryBuilder()
     ->select('Book')
     ->from(Book::class, 'Book')

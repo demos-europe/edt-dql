@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\data\Model;
+namespace Tests\data\DqlModel;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -34,14 +34,17 @@ class Birth
     private $locality;
     /**
      * @var int
+     * @ORM\Column(type="integer", nullable=false)
      */
     private $day;
     /**
      * @var int
+     * @ORM\Column(type="integer", nullable=false)
      */
     private $month;
     /**
      * @var int
+     * @ORM\Column(type="integer", nullable=false)
      */
     private $year;
 }

@@ -24,7 +24,7 @@ it makes sense to execute the filter in the database.
 With DQL we could create a query with two joins to get the desired result:
 
 ```php
-use \Tests\data\Model\Book;
+use \Tests\data\DqlModel\Book;
 $queryBuilder = $this->getEntityManager()->createQueryBuilder()
     ->select('Book')
     ->from(Book::class, 'Book')
@@ -37,7 +37,7 @@ $queryBuilder = $this->getEntityManager()->createQueryBuilder()
 This library can generate a similar query builder from the following code:
 
 ```php
-use \Tests\data\Model\Book;
+use \Tests\data\DqlModel\Book;
 use EDT\DqlQuerying\Utilities\QueryGenerator;
 use EDT\DqlQuerying\ConditionFactories\DqlConditionFactory;
 $queryGenerator = new QueryGenerator($this->getEntityManager());
@@ -76,7 +76,7 @@ Defining the sorting can be done similarly as defining conditions. In the follow
 use EDT\DqlQuerying\ConditionFactories\DqlConditionFactory;
 use EDT\DqlQuerying\SortMethodFactories\SortMethodFactory;
 use EDT\DqlQuerying\Utilities\QueryGenerator;
-use \Tests\data\Model\Book;
+use \Tests\data\DqlModel\Book;
 $conditionFactory = new DqlConditionFactory();
 $sortingFactory = new SortMethodFactory();
 $queryGenerator = new QueryGenerator($this->getEntityManager());

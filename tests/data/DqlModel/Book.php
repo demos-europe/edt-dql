@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\data\Model;
+namespace Tests\data\DqlModel;
 
 use Doctrine\ORM\Mapping as ORM;
-use Tests\data\Model\Person;
 
 /**
  * @ORM\Entity()
