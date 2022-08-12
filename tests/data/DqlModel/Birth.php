@@ -32,6 +32,19 @@ class Birth
      * @var string
      */
     private $locality;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=false)
+     */
+    private $street;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", nullable=false)
+     */
+    private $streetNumber;
+
     /**
      * @var int
      * @ORM\Column(type="integer", nullable=false)

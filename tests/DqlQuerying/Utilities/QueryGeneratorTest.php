@@ -396,14 +396,14 @@ class QueryGeneratorTest extends TestCase
 
     public function testUpperCase(): void
     {
-        $propertyPath = new PropertyPath('', PropertyPathAccessInterface::UNPACK, 'name');
+        $propertyPath = new PropertyPath('', PropertyPathAccessInterface::UNPACK, 'title');
         $sameUpperCase = new AllEqual(
             new UpperCase(new Property($propertyPath)),
             new Value('FOO'),
         );
         $queryBuilder = $this->queryGenerator->generateQueryBuilder(Book::class, [$sameUpperCase]);
         self::assertSame(
-            'SELECT Book FROM Tests\data\DqlModel\Book Book WHERE UPPER(Book.name) = ?0',
+            'SELECT Book FROM Tests\data\DqlModel\Book Book WHERE UPPER(Book.title) = ?0',
             $queryBuilder->getDQL()
         );
 
