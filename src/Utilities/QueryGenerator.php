@@ -24,20 +24,18 @@ class QueryGenerator
     }
 
     /**
-     * @param class-string                  $entityClass
-     * @param array<int,ClauseInterface>    $conditions
-     * @param array<int,OrderByInterface>   $sortMethods
-     * @param array<string,ClauseInterface> $selections
+     * @param class-string                $entityClass
+     * @param array<int,ClauseInterface>  $conditions
+     * @param array<int,OrderByInterface> $sortMethods
      *
      * @throws MappingException
      * @throws SliceException
      */
-    public function generateQueryBuilder(string $entityClass, array $conditions, array $sortMethods = [], int $offset = 0, int $limit = null, array $selections = []): QueryBuilder
+    public function generateQueryBuilder(string $entityClass, array $conditions, array $sortMethods = [], int $offset = 0, int $limit = null): QueryBuilder
     {
         $queryBuilder = $this->entityManager->createQueryBuilder();
         $metadataFactory = $this->entityManager->getMetadataFactory();
         $builderPreparer = new QueryBuilderPreparer($entityClass, $metadataFactory);
-        $builderPreparer->setSelectExpressions($selections);
         $builderPreparer->setWhereExpressions(...$conditions);
         $builderPreparer->setOrderByExpressions(...$sortMethods);
         $builderPreparer->fillQueryBuilder($queryBuilder);
