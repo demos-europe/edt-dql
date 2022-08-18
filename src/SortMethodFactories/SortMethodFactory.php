@@ -22,7 +22,7 @@ class SortMethodFactory implements SortMethodFactoryInterface
      */
     public function propertyAscending(string $property, string ...$properties): SortMethodInterface
     {
-        $propertyPath = new PropertyPath('', PropertyPathAccessInterface::UNPACK_RECURSIVE, $property, ...$properties);
+        $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK_RECURSIVE, $property, ...$properties);
         return new Ascending(new Property($propertyPath));
     }
 
@@ -32,7 +32,7 @@ class SortMethodFactory implements SortMethodFactoryInterface
      */
     public function propertyDescending(string $property, string ...$properties): SortMethodInterface
     {
-        $propertyPath = new PropertyPath('', PropertyPathAccessInterface::UNPACK_RECURSIVE, $property, ...$properties);
+        $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK_RECURSIVE, $property, ...$properties);
         return new Descending(new Property($propertyPath));
     }
 }

@@ -19,4 +19,16 @@ class MappingException extends Exception
     {
         return new self("Only LEFT JOIN and INNER JOIN are supported: {$joinType}");
     }
+
+    /**
+     * @param class-string $existingContext
+     * @param class-string $context
+     */
+    public static function conflictingContext(
+        string $existingContext,
+        string $context,
+        string $contextAlias
+    ): self {
+        return new self("Path defines the class context '$context' with the alias '$contextAlias', but that alias is already in use for the class context '$existingContext'.");
+    }
 }

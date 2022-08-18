@@ -56,41 +56,41 @@ class JoinFinderTest extends TestCase
 
     public function testAuthor(): void
     {
-        $joins = $this->joinFinder->findNecessaryJoins('', $this->bookMetadata, ['author']);
+        $joins = $this->joinFinder->findNecessaryJoins('', $this->bookMetadata, ['author'], $this->bookMetadata->getTableName());
         $firstJoin = array_shift($joins);
-        $this->checkJoin($firstJoin, 'Book.author', 't_bdafd8c8_Person');
+        $this->checkJoin($firstJoin, 'Book.author', 't_58fb870d_Person');
     }
 
     public function testTitle(): void
     {
-        $joins = $this->joinFinder->findNecessaryJoins('', $this->bookMetadata, ['title']);
+        $joins = $this->joinFinder->findNecessaryJoins('', $this->bookMetadata, ['title'], $this->bookMetadata->getTableName());
 
         self::assertCount(0, $joins);
     }
 
     public function testName(): void
     {
-        $joins = $this->joinFinder->findNecessaryJoins('', $this->bookMetadata, ['author', 'name']);
+        $joins = $this->joinFinder->findNecessaryJoins('', $this->bookMetadata, ['author', 'name'], $this->bookMetadata->getTableName());
         $firstJoin = array_shift($joins);
-        $this->checkJoin($firstJoin, 'Book.author', 't_bdafd8c8_Person');
+        $this->checkJoin($firstJoin, 'Book.author', 't_58fb870d_Person');
     }
 
     public function testBirthplace(): void
     {
-        $joins = $this->joinFinder->findNecessaryJoins('', $this->bookMetadata, ['author', 'birth']);
+        $joins = $this->joinFinder->findNecessaryJoins('', $this->bookMetadata, ['author', 'birth'], $this->bookMetadata->getTableName());
         $firstJoin = array_shift($joins);
-        $this->checkJoin($firstJoin, 'Book.author', 't_bdafd8c8_Person');
+        $this->checkJoin($firstJoin, 'Book.author', 't_58fb870d_Person');
         $secondJoin = array_shift($joins);
-        $this->checkJoin($secondJoin, 't_bdafd8c8_Person.birth', 't_1ad451b9_Birth');
+        $this->checkJoin($secondJoin, 't_58fb870d_Person.birth', 't_7e118c84_Birth');
     }
 
     public function testStreet(): void
     {
-        $joins = $this->joinFinder->findNecessaryJoins('', $this->bookMetadata, ['author', 'birth', 'street']);
+        $joins = $this->joinFinder->findNecessaryJoins('', $this->bookMetadata, ['author', 'birth', 'street'], $this->bookMetadata->getTableName());
         $firstJoin = array_shift($joins);
-        $this->checkJoin($firstJoin, 'Book.author', 't_bdafd8c8_Person');
+        $this->checkJoin($firstJoin, 'Book.author', 't_58fb870d_Person');
         $secondJoin = array_shift($joins);
-        $this->checkJoin($secondJoin, 't_bdafd8c8_Person.birth', 't_1ad451b9_Birth');
+        $this->checkJoin($secondJoin, 't_58fb870d_Person.birth', 't_7e118c84_Birth');
     }
 
     private function checkJoin(?Join $join, string $left, string $right): void

@@ -93,7 +93,7 @@ class PropertyIsEmpty implements ClauseInterface
 {
     private $paths;
     public function __construct(array $propertyPath) {
-        $this->paths = [new PropertyPath('', PropertyPath::DIRECT, ...$propertyPath)];
+        $this->paths = [new PropertyPath(null, '', PropertyPath::DIRECT, ...$propertyPath)];
     }
     public function getClauseValues(): iterable
     {
@@ -172,7 +172,7 @@ class PropertyHasValue implements ClauseInterface
     private $paths;
     public function __construct($value, array $propertyPath) {
         $this->values = [$value];
-        $this->paths = [new PropertyPath('', PropertyPath::DIRECT, ...$propertyPath)];
+        $this->paths = [new PropertyPath(null, '', PropertyPath::DIRECT, ...$propertyPath)];
     }
     public function getClauseValues(): iterable
     {
@@ -260,7 +260,7 @@ class PropertyAscending implements OrderByInterface
     private $paths;
     public function __construct(array $propertyPath)
     {
-        $this->paths = [new PropertyPath('', PropertyPath::DIRECT, ...$propertyPath)];
+        $this->paths = [new PropertyPath(null, '', PropertyPath::DIRECT, ...$propertyPath)];
     }
     public function getPropertyPaths(): iterable
     {
@@ -315,8 +315,8 @@ class SizeMinusLengthAscending implements OrderByInterface
     public function __construct(array $sizePath, array $lengthPath)
     {
         $this->paths = [
-            new PropertyPath('', PropertyPath::DIRECT, ...$sizePath),
-            new PropertyPath('', PropertyPath::UNPACK, ...$lengthPath)
+            new PropertyPath(null, '', PropertyPath::DIRECT, ...$sizePath),
+            new PropertyPath(null, '', PropertyPath::UNPACK, ...$lengthPath)
         ];
     }
     public function getPropertyPaths(): iterable
@@ -357,7 +357,7 @@ class PropertyWithDefaultAscending implements OrderByInterface
     private $values;
     public function __construct(array $propertyPath, $value)
     {
-        $this->paths = [new PropertyPath('', PropertyPath::UNPACK, ...$propertyPath)];
+        $this->paths = [new PropertyPath(null, '', PropertyPath::UNPACK, ...$propertyPath)];
         $this->values = [$value];
     }
     public function getPropertyPaths(): array

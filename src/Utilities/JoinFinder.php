@@ -53,44 +53,60 @@ class JoinFinder
      *                       of returned joins is equal to the length of the provided path.
      * @throws MappingException
      */
-    public function findNecessaryJoins(string $salt, ClassMetadataInfo $classMetadata, array $path): array
+    public function findNecessaryJoins(string $salt, ClassMetadataInfo $classMetadata, array $path, string $tableAlias): array
     {
         if ([] === $path) {
             return [];
         }
-        return $this->findJoinsRecursive($salt, $classMetadata, '', ...$path);
+
+        $joins = $this->findJoinsRecursive($salt, $classMetadata, $tableAlias, ...$path);
+
+        $keyIndexedJoins = [];
+        foreach ($joins as $join) {
+            $keyIndexedJoins[$join->getAlias()] = $join;
+        }
+
+        return $keyIndexedJoins;
     }
 
     /**
+     * @param string $pathSalt will be used when generating the tables aliases to distinguish the
+     *                         segments in this path from segments in other paths that use the same
+     *                         table name
+     *
      * @return array<int,Join>
      * @throws MappingException
      */
-    private function findJoinsRecursive(string $salt, ClassMetadataInfo $classMetadata, string $previousPathHash, string $currentPathPart, string ...$morePathParts): array
-    {
-        $isAttribute = $classMetadata->hasField($currentPathPart);
-        $isRelationship = $classMetadata->hasAssociation($currentPathPart);
-
-        if (!$isAttribute && !$isRelationship) {
-            throw new InvalidArgumentException("Current property '$currentPathPart' was not found in entity '{$classMetadata->getName()}'");
-        }
-
+    private function findJoinsRecursive(
+        string $pathSalt,
+        ClassMetadataInfo $classMetadata,
+        string $tableAlias,
+        string $pathPart,
+        string ...$morePathParts
+    ): array {
+        $isRelationship = $classMetadata->hasAssociation($pathPart);
         if ($isRelationship) {
-            $currentAliasPrefix = $this->getPathHash($salt, $currentPathPart, $previousPathHash);
-            $targetClassMetadata = $this->getTargetClassMetadata($currentPathPart, $classMetadata);
-            $tableName = $classMetadata->getTableName();
-            $targetTableName = $targetClassMetadata->getTableName();
-            $relationshipAlias = "$currentAliasPrefix$targetTableName";
-            $join = "$previousPathHash$tableName.$currentPathPart";
-            $neededJoin = new Join(Join::LEFT_JOIN, $join, $relationshipAlias);
+            $nextClassMetadata = $this->getTargetClassMetadata($pathPart, $classMetadata);
+
+            // prefix each following table alias, to distinguish if the same table is used in two
+            // different paths
+            $nextTablePrefix = hash('crc32b', "$pathSalt$tableAlias.$pathPart");
+            $nextTableAlias = $this->createTableAlias($nextTablePrefix, $nextClassMetadata);
+
+            $neededJoin = new Join(
+                Join::LEFT_JOIN,
+                "$tableAlias.$pathPart",
+                $nextTableAlias
+            );
 
             if ([] === $morePathParts) {
                 return [$neededJoin];
             }
 
             $additionallyNeededJoins = $this->findJoinsRecursive(
-                $salt,
-                $targetClassMetadata,
-                $currentAliasPrefix,
+                '', // salt is already included in $nextTableAlias, no need to pass it down
+                $nextClassMetadata,
+                $nextTableAlias,
                 ...$morePathParts
             );
 
@@ -99,23 +115,28 @@ class JoinFinder
             return $additionallyNeededJoins;
         }
 
+        $isAttribute = $classMetadata->hasField($pathPart);
+        if (!$isAttribute) {
+            throw new InvalidArgumentException("Current property '$pathPart' was not found in entity '{$classMetadata->getName()}'");
+        }
+
         if ([] !== $morePathParts) {
             $properties = implode(',', $morePathParts);
-            throw new InvalidArgumentException("Current property '$currentPathPart' is not an association but the path continues with the following properties: $properties");
+            throw new InvalidArgumentException("Current property '$pathPart' is not an association but the path continues with the following properties: $properties");
         }
 
         return [];
     }
 
     /**
-     * @param string $currentPathPart  The current path part
-     * @param string $previousPathHash The single hash generated from all previous path parts
+     * Prefixes the given table name with the given value.
      *
-     * @return string The new hash generated from all previous path parts and the current one.
+     * The prefixing allows to distinguish multiple usages of the same table in different contextes,
+     * e.g. different paths or separate `from` clauses.
      */
-    protected function getPathHash(string $salt, string $currentPathPart, string $previousPathHash): string
+    public function createTableAlias(string $prefix, ClassMetadataInfo $tableInfo): string
     {
-        return "t{$salt}_".hash('crc32b', $previousPathHash.$currentPathPart).'_';
+        return "t_{$prefix}_{$tableInfo->getTableName()}";
     }
 
     /**

@@ -18,9 +18,14 @@ use EDT\DqlQuerying\Contracts\MappingException;
 use EDT\DqlQuerying\Contracts\OrderByInterface;
 use EDT\Querying\Contracts\PropertyPathAccessInterface;
 use EDT\Querying\Utilities\Iterables;
+use ReflectionException;
+use function array_key_exists;
 use function array_slice;
 use function count;
 
+/**
+ * @internal
+ */
 class QueryBuilderPreparer
 {
     /**
@@ -38,6 +43,11 @@ class QueryBuilderPreparer
     private $joinClauses = [];
 
     /**
+     * @var array<string,class-string> mapping from the alias to the entity type
+     */
+    private $fromClauses = [];
+
+    /**
      * Mapping from (integer) parameter key to parameter value.
      * Using {@see Parameter} would be possible too but
      * seems more complex and not necessary.
@@ -49,19 +59,32 @@ class QueryBuilderPreparer
     private $parameters = [];
 
     /**
+     * Provides all needed information to choose the correct entity type and mappings to translate
+     * the group into DQL data.
+     *
      * @var ClassMetadataInfo
      */
-    private $classMetadata;
+    private $mainClassMetadata;
 
     /**
      * @var array<int,ClauseInterface>
      */
-    private $conditions;
+    private $conditions = [];
 
     /**
      * @var OrderByInterface[]
      */
-    private $sortMethods;
+    private $sortMethods = [];
+
+    /**
+     * @var ClassMetadataFactory
+     */
+    private $metadataFactory;
+
+    /**
+     * @var array<string, ClauseInterface> keys are used as aliases
+     */
+    private $selections = [];
 
     /**
      * Transform the given group into raw DQL query data using the given entity definition.
@@ -71,15 +94,26 @@ class QueryBuilderPreparer
      * given group. The joins required to limit the result will be automatically generated
      * using the group and entity definition.
      *
-     * @param ClassMetadataInfo $classMetadata Provides all needed information to
-     *                                         choose the correct entity type and
-     *                                         mappings to translate the group
-     *                                         into DQL data.
+     * @param class-string $mainEntityClass the entity class to fetch instances of
      */
-    public function __construct(ClassMetadataInfo $classMetadata, ClassMetadataFactory $metadataFactory)
+    public function __construct(string $mainEntityClass, ClassMetadataFactory $metadataFactory)
     {
         $this->joinFinder = new JoinFinder($metadataFactory);
-        $this->classMetadata = $classMetadata;
+        $this->metadataFactory = $metadataFactory;
+        $this->mainClassMetadata = $metadataFactory->getMetadataFor($mainEntityClass);
+    }
+
+    /**
+     * Overwrites the currently set clauses with the select expressions to use to when fetching the
+     * data.
+     * If called with no parameters then previously set conditions will be removed.
+     * If not called at all it defaults to the main entity class.
+     *
+     * @param array<string, ClauseInterface> $selections
+     */
+    public function setSelectExpressions(array $selections): void
+    {
+        $this->selections = $selections;
     }
 
     /**
@@ -109,28 +143,56 @@ class QueryBuilderPreparer
      */
     public function fillQueryBuilder(QueryBuilder $queryBuilder): void
     {
-        // start filling the actual query
-        $entityAlias = $this->classMetadata->getTableName();
-        $queryBuilder->select($entityAlias);
-        $queryBuilder->from($this->classMetadata->getName(), $entityAlias);
-
         // Side effects! Execution order matters!
-        // While setting WHERE and ORDER BY the joins and parameters are determined.
-        $this->setWhere($queryBuilder);
-        $this->setOrderBy($queryBuilder);
-        $this->setParameters($queryBuilder);
+        // Process all conditions, sort methods and selects to collect `from`s, joins and
+        // parameters before setting those.
+        $selectExpressions = array_map([$this, 'processClause'], $this->selections);
+        $whereExpressions = array_map([$this, 'processClause'], $this->conditions);
+        $orderExpressions = array_map([$this, 'processClause'], $this->sortMethods);
+        $entityAlias = $this->mainClassMetadata->getTableName();
+
+        // start filling the actual query
+
+        // set `SELECT`s
+        if ([] === $selectExpressions) {
+            $queryBuilder->select($entityAlias);
+        }
+        $selectExpressions = array_map(static function ($expression, string $alias): string {
+            return "$expression AS $alias";
+        }, $selectExpressions, array_keys($selectExpressions));
+        $queryBuilder->addSelect($selectExpressions);
+
+        // set `FROM`s
+        $queryBuilder->from($this->mainClassMetadata->getName(), $entityAlias);
+        array_map([$queryBuilder, 'from'], $this->fromClauses, array_keys($this->fromClauses));
+
+        // set `JOIN`s
         $this->setJoins($queryBuilder);
+
+        // set `WHERE`s
+        if ([] !== $whereExpressions) {
+            // Set the 'WHERE' expressions that resulted from the given clause.
+            // Each expression includes all nested conditions if any are present.
+            $queryBuilder->where(...$whereExpressions);
+        }
+
+        // set `ORDER BY`s
+        $orderings = array_map([$this, 'createOrderBy'], $orderExpressions, $this->sortMethods);
+        array_map([$queryBuilder, 'addOrderBy'], $orderings);
+
+        // set parameters
+        $queryBuilder->setParameters($this->parameters);
+
         $this->resetTemporaryState();
     }
 
     /**
      * @throws MappingException
      */
-    protected function processSortingClause(OrderByInterface $sortClause): OrderBy
+    protected function createOrderBy($orderByDql, OrderByInterface $sortClause): OrderBy
     {
-        $dql = $this->processClause($sortClause);
         $direction = $sortClause->getDirection();
-        return new OrderBy((string)$dql, $direction);
+        return new OrderBy((string)$orderByDql, $direction);
     }
 
     /**
@@ -143,15 +205,16 @@ class QueryBuilderPreparer
         $clauseValues = Iterables::asArray($clause->getClauseValues());
         $valueIndices = array_map([$this, 'addToParameters'], $clauseValues);
         $columnNames = array_map(function (PropertyPathAccessInterface $path): string {
-            return $this->processPath($path->getSalt(), $path->getAccessDepth(), ...iterator_to_array($path));
+            return $this->processPath($path->getSalt(), $path->getAccessDepth(), $path->getContext(), ...iterator_to_array($path));
         }, Iterables::asArray($clause->getPropertyPaths()));
 
         return $clause->asDql($valueIndices, $columnNames);
     }
 
     /**
-     * Processes the path to find all necessary joins. The joins found are added to
-     * {@link QueryBuilderPreparer::$joinClauses}.
+     * Processes the path to find all necessary joins and `from` clauses. The joins found are added to
+     * {@link QueryBuilderPreparer::$joinClauses}. The `from` clauses found are added to
+     * {@link QueryBuilderPreparer::$fromClauses}.
      *
      * @param int $accessDepth 1 if the last property in the given path is a relationship
      *                         and a join needs to be created from that relationship property
@@ -161,18 +224,23 @@ class QueryBuilderPreparer
      *                         and no join should be created from that relationship property
      *                         to its target entity. In that case the alias to the join
      *                         will be returned (with appended property name).
+     * @param class-string|null $context non-`null` if a different context (i.e. a separate `from`
+     *                                   clause should be used for the current path
      *
      * @return string The alias of the entity at the end of the path with or without appended property name.
      *
      * @throws MappingException
+     * @throws \Doctrine\Persistence\Mapping\MappingException
+     * @throws ReflectionException
      */
-    protected function processPath(string $salt, int $accessDepth, string $property, string ...$properties): string
+    protected function processPath(string $salt, int $accessDepth, ?string $context, string $property, string ...$properties): string
     {
         array_unshift($properties, $property);
         $originalPathLength = count($properties);
+        $inMainContext = null === $context;
 
         /**
-         * If the condition acts on the relationship name (ie. does not need a join to the target
+         * If the condition acts on the relationship name (i.e. does not need a join to the target
          * entity) we do not look for joins at the path parts after the relationship and thus remove
          * it here. For more information see {@link PropertyPathAccessInterface::getAccessDepth()}.
          */
@@ -186,7 +254,26 @@ class QueryBuilderPreparer
             $lastProperty = $properties[array_key_last($properties)];
         }
 
-        $neededJoins = $this->joinFinder->findNecessaryJoins($salt, $this->classMetadata, $properties);
+        if ($inMainContext) {
+            $classMetadata = $this->mainClassMetadata;
+        } else {
+            $classMetadata = $this->metadataFactory->getMetadataFor($context);
+            $this->addFromClause($context, $this->joinFinder->createTableAlias($salt, $classMetadata));
+        }
+
+
+        // For the main context the simple table name will be used to match the alias in the main `from` clause.
+        // Separate contexts will be prefixed to distinguish them if they use the same table name as the main context.
+        $entityAlias = $inMainContext
+            ? $classMetadata->getTableName()
+            : $this->joinFinder->createTableAlias($salt, $classMetadata);
+
+        $neededJoins = $this->joinFinder->findNecessaryJoins(
+            $salt,
+            $classMetadata,
+            $properties,
+            $entityAlias
+        );
         $lastPropertyWasRelationship = count($neededJoins) === $originalPathLength;
 
         if (0 !== count($neededJoins)) {
@@ -194,7 +281,7 @@ class QueryBuilderPreparer
             // Will override duplicated keys, this is ok, as we expect the key
             // to be the join alias and the join alias to be unique except
             // it actually corresponds to the exactly same join clause.
-            $this->joinClauses = array_merge($this->joinClauses, $this->useAliasAsKey($neededJoins));
+            $this->joinClauses = array_merge($this->joinClauses, $neededJoins);
 
             // As there were joins needed to access the property the accessed entity is now the last
             // join determined above.
@@ -205,7 +292,7 @@ class QueryBuilderPreparer
             // If the condition needs to access a property directly on the entity we append the
             // property name to the entity alias.
             if (!$lastPropertyWasRelationship || $dropProperties) {
-                return "{$entityAlias}.{$lastProperty}";
+                return "$entityAlias.$lastProperty";
             }
 
             /**
@@ -222,22 +309,7 @@ class QueryBuilderPreparer
 
         // If no joins are needed for this condition we can simply use the root entity alias with
         // the accessed property appended.
-        return "{$this->classMetadata->getTableName()}.$lastProperty";
-    }
-
-    /**
-     * @param array<int,Join>|Join[] $joins
-     *
-     * @return array<string,Join>|Join[]
-     */
-    protected function useAliasAsKey(array $joins): array
-    {
-        $result = [];
-        foreach ($joins as $join) {
-            $result[$join->getAlias()] = $join;
-        }
-
-        return $result;
+        return "$entityAlias.$lastProperty";
     }
 
     /**
@@ -252,35 +324,6 @@ class QueryBuilderPreparer
     {
         $parameterIndex = array_push($this->parameters, $value) - 1;
         return "?{$parameterIndex}";
-    }
-
-    /**
-     * @throws MappingException
-     */
-    private function setWhere(QueryBuilder $queryBuilder): void
-    {
-        if ([] !== $this->conditions) {
-            // The 'WHERE' expressions that resulted from the given clause.
-            // Each expression includes all nested conditions if any are present.
-            $whereExpressions = array_map([$this, 'processClause'], $this->conditions);
-            $queryBuilder->where(...$whereExpressions);
-        }
-    }
-
-    /**
-     * @throws MappingException
-     */
-    private function setOrderBy(QueryBuilder $queryBuilder): void
-    {
-        if ([] !== $this->sortMethods) {
-            $orderings = array_map([$this, 'processSortingClause'], $this->sortMethods);
-            array_map([$queryBuilder, 'addOrderBy'], $orderings);
-        }
-    }
-
-    private function setParameters(QueryBuilder $queryBuilder): void
-    {
-        $queryBuilder->setParameters($this->parameters);
     }
 
     /**
@@ -318,5 +361,22 @@ class QueryBuilderPreparer
     {
         $this->joinClauses = [];
         $this->parameters = [];
+    }
+
+    /**
+     * @param class-string $context
+     *
+     * @throws MappingException
+     */
+    private function addFromClause(string $context, string $tableAlias): void
+    {
+        if (array_key_exists($tableAlias, $this->fromClauses)) {
+            $existingContext = $this->fromClauses[$tableAlias];
+            if ($existingContext !== $context) {
+                throw MappingException::conflictingContext($existingContext, $context, $tableAlias);
+            }
+        } else {
+            $this->fromClauses[$tableAlias] = $context;
+        }
     }
 }
