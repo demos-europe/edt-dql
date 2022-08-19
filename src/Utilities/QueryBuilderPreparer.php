@@ -17,12 +17,15 @@ use Doctrine\ORM\QueryBuilder;
 use EDT\DqlQuerying\Contracts\MappingException;
 use EDT\DqlQuerying\Contracts\OrderByInterface;
 use EDT\Querying\Contracts\PropertyPathAccessInterface;
-use EDT\Querying\Utilities\Iterables;
+use EDT\Querying\PropertyPaths\PathInfo;
 use ReflectionException;
 use function array_key_exists;
 use function array_slice;
 use function count;
 
+/**
+ * @internal
+ */
 class QueryBuilderPreparer
 {
     /**
@@ -79,6 +82,11 @@ class QueryBuilderPreparer
     private $metadataFactory;
 
     /**
+     * @var array<string, ClauseInterface> keys are used as aliases
+     */
+    private $selections = [];
+
+    /**
      * Transform the given group into raw DQL query data using the given entity definition.
      *
      * The query data will have the entity type and alias to return from the query set to those
@@ -93,6 +101,19 @@ class QueryBuilderPreparer
         $this->joinFinder = new JoinFinder($metadataFactory);
         $this->metadataFactory = $metadataFactory;
         $this->mainClassMetadata = $metadataFactory->getMetadataFor($mainEntityClass);
+    }
+
+    /**
+     * Overwrites the currently set clauses with the select expressions to use to when fetching the
+     * data.
+     * If called with no parameters then previously set conditions will be removed.
+     * If not called at all it defaults to the main entity class.
+     *
+     * @param array<string, ClauseInterface> $selections
+     */
+    public function setSelectExpressions(array $selections): void
+    {
+        $this->selections = $selections;
     }
 
     /**
@@ -122,18 +143,27 @@ class QueryBuilderPreparer
      */
     public function fillQueryBuilder(QueryBuilder $queryBuilder): void
     {
-        // start filling the actual query
-        $entityAlias = $this->mainClassMetadata->getTableName();
-        $queryBuilder->select($entityAlias);
-        $queryBuilder->from($this->mainClassMetadata->getName(), $entityAlias);
-
         // Side effects! Execution order matters!
-        // Process all conditions and sort methods to collect `from`s, joins and parameters
-        // before setting those.
+        // Process all conditions, sort methods and selects to collect `from`s, joins and
+        // parameters before setting those.
+        $selectExpressions = array_map([$this, 'processClause'], $this->selections);
         $whereExpressions = array_map([$this, 'processClause'], $this->conditions);
         $orderExpressions = array_map([$this, 'processClause'], $this->sortMethods);
+        $entityAlias = $this->mainClassMetadata->getTableName();
 
-        // set additional `from`s
+        // start filling the actual query
+
+        // set `SELECT`s
+        if ([] === $selectExpressions) {
+            $queryBuilder->select($entityAlias);
+        }
+        $selectExpressions = array_map(static function ($expression, string $alias): string {
+            return "$expression AS $alias";
+        }, $selectExpressions, array_keys($selectExpressions));
+        $queryBuilder->addSelect($selectExpressions);
+
+        // set `FROM`s
+        $queryBuilder->from($this->mainClassMetadata->getName(), $entityAlias);
         array_map([$queryBuilder, 'from'], $this->fromClauses, array_keys($this->fromClauses));
 
         // set `JOIN`s
@@ -172,11 +202,11 @@ class QueryBuilderPreparer
      */
     protected function processClause(ClauseInterface $clause)
     {
-        $clauseValues = Iterables::asArray($clause->getClauseValues());
-        $valueIndices = array_map([$this, 'addToParameters'], $clauseValues);
-        $columnNames = array_map(function (PropertyPathAccessInterface $path): string {
-            return $this->processPath($path->getSalt(), $path->getAccessDepth(), $path->getContext(), ...iterator_to_array($path));
-        }, Iterables::asArray($clause->getPropertyPaths()));
+        $valueIndices = array_map([$this, 'addToParameters'], $clause->getClauseValues());
+        $columnNames = array_map(function (PathInfo $pathInfo): string {
+            $path = $pathInfo->getPath();
+            return $this->processPath($pathInfo->isToManyAllowed(), $path->getSalt(), $path->getAccessDepth(), $path->getContext(), ...iterator_to_array($path));
+        }, $clause->getPropertyPaths());
 
         return $clause->asDql($valueIndices, $columnNames);
     }
@@ -203,7 +233,7 @@ class QueryBuilderPreparer
      * @throws \Doctrine\Persistence\Mapping\MappingException
      * @throws ReflectionException
      */
-    protected function processPath(string $salt, int $accessDepth, ?string $context, string $property, string ...$properties): string
+    protected function processPath(bool $isToManyAllowed, string $salt, int $accessDepth, ?string $context, string $property, string ...$properties): string
     {
         array_unshift($properties, $property);
         $originalPathLength = count($properties);
@@ -239,6 +269,7 @@ class QueryBuilderPreparer
             : $this->joinFinder->createTableAlias($salt, $classMetadata);
 
         $neededJoins = $this->joinFinder->findNecessaryJoins(
+            $isToManyAllowed,
             $salt,
             $classMetadata,
             $properties,
@@ -271,7 +302,7 @@ class QueryBuilderPreparer
              *
              * Example: IS NULL needs a join to a target relationship and accesses
              * the target relationships entity alias. But in case of a non-relationship as last
-             * property in the path no such join is executed and we still need to access the
+             * property in the path no such join is executed, and we still need to access the
              * property on the entity.
              */
             return $entityAlias;

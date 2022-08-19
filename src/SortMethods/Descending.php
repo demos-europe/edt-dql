@@ -29,7 +29,7 @@ class Descending extends \EDT\Querying\SortMethods\Descending implements OrderBy
         return self::DESCENDING;
     }
 
-    public function getClauseValues(): iterable
+    public function getClauseValues(): array
     {
         return [];
     }

@@ -13,7 +13,7 @@ use EDT\Querying\Utilities\Iterables;
  */
 class Property extends \EDT\Querying\Functions\Property implements ClauseFunctionInterface
 {
-    public function getClauseValues(): iterable
+    public function getClauseValues(): array
     {
         return [];
     }

@@ -30,7 +30,7 @@ class Constant extends \EDT\Querying\Functions\Value implements ClauseFunctionIn
         $this->customDqlValue = true;
     }
 
-    public function getClauseValues(): iterable
+    public function getClauseValues(): array
     {
         return [];
     }

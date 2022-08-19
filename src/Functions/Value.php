@@ -14,7 +14,7 @@ use EDT\Querying\Utilities\Iterables;
  */
 class Value extends \EDT\Querying\Functions\Value implements ClauseFunctionInterface
 {
-    public function getClauseValues(): iterable
+    public function getClauseValues(): array
     {
         return [$this->value];
     }

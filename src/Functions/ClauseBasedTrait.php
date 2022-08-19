@@ -11,6 +11,7 @@ use Doctrine\ORM\Query\Expr\Math;
 use EDT\DqlQuerying\Contracts\ClauseInterface;
 use EDT\Querying\Contracts\PathsBasedInterface;
 use EDT\Querying\Utilities\Iterables;
+use function count;
 
 trait ClauseBasedTrait
 {
@@ -19,10 +20,10 @@ trait ClauseBasedTrait
      */
     protected $clauses = [];
 
-    public function getClauseValues(): iterable
+    public function getClauseValues(): array
     {
-        return Iterables::flat(static function (ClauseInterface $clause): array {
-            return Iterables::asArray($clause->getClauseValues());
+        return Iterables::mapFlat(static function (ClauseInterface $clause): array {
+            return $clause->getClauseValues();
         }, $this->clauses);
     }
 
@@ -63,7 +64,7 @@ trait ClauseBasedTrait
     protected function unflatClauseReferences(string ...$valueReferences): array
     {
         $clauseValueCountables = array_map(static function (ClauseInterface $clause): int {
-            return Iterables::count($clause->getClauseValues());
+            return count($clause->getClauseValues());
         }, $this->clauses);
         return Iterables::split($valueReferences, false, ...$clauseValueCountables);
     }
@@ -88,7 +89,7 @@ trait ClauseBasedTrait
     private function unflatPropertyAliases(string ...$propertyAliases): array
     {
         $propertyAliasCountables = array_map(static function (PathsBasedInterface $pathsBased): int {
-            return Iterables::count($pathsBased->getPropertyPaths());
+            return count($pathsBased->getPropertyPaths());
         }, $this->clauses);
         return Iterables::split($propertyAliases, false, ...$propertyAliasCountables);
     }

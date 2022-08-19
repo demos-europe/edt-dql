@@ -29,7 +29,7 @@ class Ascending extends \EDT\Querying\SortMethods\Ascending implements OrderBySo
         return self::ASCENDING;
     }
 
-    public function getClauseValues(): iterable
+    public function getClauseValues(): array
     {
         return [];
     }

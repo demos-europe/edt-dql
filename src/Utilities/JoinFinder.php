@@ -11,7 +11,12 @@ use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
 use EDT\DqlQuerying\Contracts\MappingException;
 use InvalidArgumentException;
+use ReflectionException;
+use function array_key_exists;
 
+/**
+ * @internal
+ */
 class JoinFinder
 {
     /**
@@ -26,7 +31,7 @@ class JoinFinder
 
     /**
      * Find the joins needed for the actual 'where' expression from the property path.
-     * The joins will be retrieved from the given entity definition. However
+     * The joins will be retrieved from the given entity definition. However,
      * the alias of each join will be prefixed with an identifier generated from the
      * path leading to that join. This way it is ensured that duplicated
      * aliases correspond to duplicated join clauses from which all but one can be
@@ -35,13 +40,13 @@ class JoinFinder
      * The left side of the joins ({@link Join::getJoin()}) will have the original entity or a join
      * alias first, which is followed by the source relationship name:
      * * original entity example: `Book.authors`
-     * * nested join example: `t_d18ab622_Book.authors`
+     * * nested join example: `t_4dba5d08_Book.authors`
      *
      * The right side of the joins ({@link Join::getAlias()}) will be the alias of the entity
      * that can be used in WHERE clauses. The join alias will be prefixed with a hash identifying
      * the previous path to not mix up aliases with the same backing entity that resulted from
      * different paths:
-     * * `t_d18ab622_authors` in case of a join to the `authors` of a `Book` entity
+     * * `t_58fb870d_Person` in case of a join to the `authors` of a `Book` entity
      *
      * @param string[] $path
      *
@@ -53,17 +58,21 @@ class JoinFinder
      *                       of returned joins is equal to the length of the provided path.
      * @throws MappingException
      */
-    public function findNecessaryJoins(string $salt, ClassMetadataInfo $classMetadata, array $path, string $tableAlias): array
+    public function findNecessaryJoins(bool $toManyAllowed, string $salt, ClassMetadataInfo $classMetadata, array $path, string $tableAlias): array
     {
         if ([] === $path) {
             return [];
         }
 
-        $joins = $this->findJoinsRecursive($salt, $classMetadata, $tableAlias, ...$path);
+        $joins = $this->findJoinsRecursive($toManyAllowed, $salt, $classMetadata, $tableAlias, ...$path);
 
         $keyIndexedJoins = [];
         foreach ($joins as $join) {
-            $keyIndexedJoins[$join->getAlias()] = $join;
+            $alias = $join->getAlias();
+            if (array_key_exists($alias, $keyIndexedJoins)) {
+                throw MappingException::duplicatedAlias($alias, $path, $salt);
+            }
+            $keyIndexedJoins[$alias] = $join;
         }
 
         return $keyIndexedJoins;
@@ -76,16 +85,21 @@ class JoinFinder
      *
      * @return array<int,Join>
      * @throws MappingException
+     * @throws OrmMappingException
      */
     private function findJoinsRecursive(
+        bool $toManyAllowed,
         string $pathSalt,
         ClassMetadataInfo $classMetadata,
         string $tableAlias,
         string $pathPart,
         string ...$morePathParts
     ): array {
-        $isRelationship = $classMetadata->hasAssociation($pathPart);
-        if ($isRelationship) {
+        if ($this->isRelationship($classMetadata, $pathPart)) {
+            if (!$toManyAllowed && $this->isToManyRelationship($classMetadata, $pathPart)) {
+                throw MappingException::disallowedToMany($classMetadata->getName(), $pathPart);
+            }
+
             $nextClassMetadata = $this->getTargetClassMetadata($pathPart, $classMetadata);
 
             // prefix each following table alias, to distinguish if the same table is used in two
@@ -104,6 +118,7 @@ class JoinFinder
             }
 
             $additionallyNeededJoins = $this->findJoinsRecursive(
+                $toManyAllowed,
                 '', // salt is already included in $nextTableAlias, no need to pass it down
                 $nextClassMetadata,
                 $nextTableAlias,
@@ -115,8 +130,7 @@ class JoinFinder
             return $additionallyNeededJoins;
         }
 
-        $isAttribute = $classMetadata->hasField($pathPart);
-        if (!$isAttribute) {
+        if (!$this->isAttribute($classMetadata, $pathPart)) {
             throw new InvalidArgumentException("Current property '$pathPart' was not found in entity '{$classMetadata->getName()}'");
         }
 
@@ -153,8 +167,28 @@ class JoinFinder
             }
 
             return $classMetadata;
-        } catch (OrmMappingException | PersistenceMappingException | \ReflectionException $e) {
+        } catch (OrmMappingException | PersistenceMappingException | ReflectionException $e) {
             throw MappingException::relationshipUnavailable($relationshipName, $metadata->getName(), $e);
         }
+    }
+
+    /**
+     * @throws OrmMappingException
+     */
+    private function isToManyRelationship(ClassMetadataInfo $classMetadata, string $property): bool
+    {
+        $mapping = $classMetadata->getAssociationMapping($property);
+
+        return (bool) ($mapping['type'] & ClassMetadataInfo::TO_MANY);
+    }
+
+    private function isRelationship(ClassMetadataInfo $classMetadata, string $property): bool
+    {
+        return $classMetadata->hasAssociation($property);
+    }
+
+    private function isAttribute(ClassMetadataInfo $classMetadata, string $property)
+    {
+        return $classMetadata->hasField($property);
     }
 }
