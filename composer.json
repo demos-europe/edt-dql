@@ -6,7 +6,7 @@
     "require": {
         "doctrine/orm": "^2.5",
         "php": ">=7.3,<8.2",
-        "demos-europe/edt-queries": "^0.8"
+        "demos-europe/edt-queries": "^0.7.1"
     },
     "authors": [
         {
@@ -32,8 +32,8 @@
         "repman-io/composer-plugin": "^1.1"
     },
     "conflict": {
-        "demos-europe/edt-extra": "<0.7.0",
-        "demos-europe/edt-access-definitions": "<0.7.0",
-        "demos-europe/edt-paths": "<0.7.0"
+        "demos-europe/edt-extra": "<0.7.1",
+        "demos-europe/edt-access-definitions": "<0.7.1",
+        "demos-europe/edt-paths": "<0.7.1"
     }
 }
