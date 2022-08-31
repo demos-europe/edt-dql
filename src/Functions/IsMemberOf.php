@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\Functions;
 
-use Doctrine\ORM\Query\Expr;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 
 /**
@@ -15,12 +14,10 @@ use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
  *
  * An {@link OneOf alternative} implementation exists explicitly covering the other case.
  *
- * @template-implements ClauseFunctionInterface<bool>
+ * @template-extends AbstractClauseFunction<bool>
  */
-class IsMemberOf extends \EDT\Querying\Functions\OneOf implements ClauseFunctionInterface
+class IsMemberOf extends AbstractClauseFunction
 {
-    use ClauseBasedTrait;
-
     /**
      * @template V
      * @phpstan-param ClauseFunctionInterface<array<V>> $contains
@@ -28,13 +25,15 @@ class IsMemberOf extends \EDT\Querying\Functions\OneOf implements ClauseFunction
      */
     public function __construct(ClauseFunctionInterface $contains, ClauseFunctionInterface $contained)
     {
-        parent::__construct($contains, $contained);
-        $this->setClauses($contains, $contained);
+        parent::__construct(
+            new \EDT\Querying\Functions\OneOf($contains, $contained),
+            $contains, $contained
+        );
     }
 
     public function asDql(array $valueReferences, array $propertyAliases)
     {
         [$contains, $contained] = $this->getDqls($valueReferences, $propertyAliases);
-        return (new Expr())->isMemberOf($contained, $contains);
+        return $this->expr->isMemberOf($contained, $contains);
     }
 }

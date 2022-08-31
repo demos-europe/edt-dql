@@ -13,6 +13,7 @@ use EDT\DqlQuerying\Contracts\MappingException;
 use InvalidArgumentException;
 use ReflectionException;
 use function array_key_exists;
+use function get_class;
 
 /**
  * @internal
@@ -53,7 +54,7 @@ class JoinFinder
      * @return array<string, Join> The needed joins. The key will be the alias of
      *                       {@link Join::getAlias()} to ensure uniqueness of the joins returned.
      *                       The count indicates if the last property was a relationship or an attribute.
-     *                       In case of an non-relationship the number of returned joins is exactly one less
+     *                       In case of a non-relationship the number of returned joins is exactly one less
      *                       than the length of the provided path. In case of a relationship the number
      *                       of returned joins is equal to the length of the provided path.
      * @throws MappingException
@@ -69,6 +70,9 @@ class JoinFinder
         $keyIndexedJoins = [];
         foreach ($joins as $join) {
             $alias = $join->getAlias();
+            if (null === $alias) {
+                throw new InvalidArgumentException('Alias must not be null');
+            }
             if (array_key_exists($alias, $keyIndexedJoins)) {
                 throw MappingException::duplicatedAlias($alias, $path, $salt);
             }
@@ -134,6 +138,7 @@ class JoinFinder
             throw new InvalidArgumentException("Current property '$pathPart' was not found in entity '{$classMetadata->getName()}'");
         }
 
+        // attributes must not be followed by additional paths
         if ([] !== $morePathParts) {
             $properties = implode(',', $morePathParts);
             throw new InvalidArgumentException("Current property '$pathPart' is not an association but the path continues with the following properties: $properties");
@@ -187,7 +192,7 @@ class JoinFinder
         return $classMetadata->hasAssociation($property);
     }
 
-    private function isAttribute(ClassMetadataInfo $classMetadata, string $property)
+    private function isAttribute(ClassMetadataInfo $classMetadata, string $property): bool
     {
         return $classMetadata->hasField($property);
     }

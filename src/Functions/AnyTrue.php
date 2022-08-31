@@ -8,20 +8,20 @@ use Doctrine\ORM\Query\Expr\Orx;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 
 /**
- * @template-implements ClauseFunctionInterface<bool>
+ * @template-extends AbstractClauseFunction<bool>
  */
-class AnyTrue extends \EDT\Querying\Functions\AnyTrue implements ClauseFunctionInterface
+class AnyTrue extends AbstractClauseFunction
 {
-    use ClauseBasedTrait;
-
     /**
      * @phpstan-param ClauseFunctionInterface<bool> $firstFunction
      * @phpstan-param ClauseFunctionInterface<bool> ...$additionalFunctions
      */
     public function __construct(ClauseFunctionInterface $firstFunction, ClauseFunctionInterface ...$additionalFunctions)
     {
-        parent::__construct($firstFunction, ...$additionalFunctions);
-        $this->setClauses($firstFunction, ...$additionalFunctions);
+        parent::__construct(
+            new \EDT\Querying\Functions\AnyTrue($firstFunction, ...$additionalFunctions),
+            $firstFunction, ...$additionalFunctions
+        );
     }
 
     /**

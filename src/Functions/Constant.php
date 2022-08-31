@@ -4,30 +4,34 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\Functions;
 
-
+use Doctrine\ORM\Query\Expr\Comparison;
+use Doctrine\ORM\Query\Expr\Composite;
+use Doctrine\ORM\Query\Expr\Func;
+use Doctrine\ORM\Query\Expr\Math;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 use EDT\Querying\Utilities\Iterables;
 
 /**
- * @template-implements ClauseFunctionInterface<mixed>
- * @template-extends \EDT\Querying\Functions\Value<mixed>
+ * @template V of Composite|Math|Func|Comparison|string
+ * @template R
+ * @template-implements ClauseFunctionInterface<R>
+ * @template-extends \EDT\Querying\Functions\Value<R>
  */
 class Constant extends \EDT\Querying\Functions\Value implements ClauseFunctionInterface
 {
     /**
-     * @var mixed
+     * @var V
      */
     private $dqlValue;
 
     /**
-     * @var bool
+     * @param R $phpValue
+     * @param V $dqlValue
      */
-    private $customDqlValue = false;
-
-    public function setDqlValue($dqlValue): void
+    public function __construct($phpValue, $dqlValue)
     {
+        parent::__construct($phpValue);
         $this->dqlValue = $dqlValue;
-        $this->customDqlValue = true;
     }
 
     public function getClauseValues(): array
@@ -35,10 +39,13 @@ class Constant extends \EDT\Querying\Functions\Value implements ClauseFunctionIn
         return [];
     }
 
+    /**
+     * @return V
+     */
     public function asDql(array $valueReferences, array $propertyAliases)
     {
         Iterables::assertCount(0, $valueReferences);
         Iterables::assertCount(0, $propertyAliases);
-        return $this->customDqlValue ? $this->dqlValue : $this->value;
+        return $this->dqlValue;
     }
 }

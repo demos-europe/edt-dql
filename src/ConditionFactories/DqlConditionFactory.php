@@ -32,6 +32,9 @@ use EDT\Querying\Contracts\PropertyPathAccessInterface;
 use EDT\Querying\PropertyPaths\PropertyPath;
 use function count;
 
+/**
+ * @template-implements ConditionFactoryInterface<ClauseFunctionInterface<bool>>
+ */
 class DqlConditionFactory implements ConditionFactoryInterface
 {
     /**
@@ -39,10 +42,8 @@ class DqlConditionFactory implements ConditionFactoryInterface
      */
     public function false(): FunctionInterface
     {
-        $condition = new Constant(false);
-        // using 'false' here does not work with some database drivers
-        $condition->setDqlValue('1 = 2');
-        return $condition;
+        // using 'false' here as DQL value does not work with some database drivers
+        return new Constant(false, '1 = 2');
     }
 
     /**
@@ -50,21 +51,19 @@ class DqlConditionFactory implements ConditionFactoryInterface
      */
     public function true(): FunctionInterface
     {
-        $condition = new Constant(true);
         // using 'true' here does not work with some database drivers
-        $condition->setDqlValue('1 = 1');
-        return $condition;
+        return new Constant(true, '1 = 1');
     }
 
     /**
-     * @param ClauseFunctionInterface<bool> $firstClause
+     * @param ClauseFunctionInterface<bool> $firstFunction
      * @param ClauseFunctionInterface<bool> ...$additionalClauses
      *
      * @return ClauseFunctionInterface<bool>
      */
-    public function allConditionsApply(FunctionInterface $firstClause, FunctionInterface ...$additionalClauses): FunctionInterface
+    public function allConditionsApply(FunctionInterface $firstFunction, FunctionInterface ...$additionalClauses): FunctionInterface
     {
-        return new AllTrue($firstClause, ...$additionalClauses);
+        return new AllTrue($firstFunction, ...$additionalClauses);
     }
 
     /**
@@ -84,10 +83,10 @@ class DqlConditionFactory implements ConditionFactoryInterface
      * @return ClauseFunctionInterface<bool>
      * @throws PathException
      */
-    public function propertiesEqual(array $leftPropertyPath, array $rightPropertyPath, string $rightEntityClass = null, string $salt = ''): FunctionInterface
+    public function propertiesEqual(array $leftProperties, array $rightProperties, string $rightEntityClass = null, string $salt = ''): FunctionInterface
     {
-        $leftPropertyPathInstance = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, ...$leftPropertyPath);
-        $rightPropertyPathInstance = new PropertyPath($rightEntityClass, $salt, PropertyPathAccessInterface::UNPACK, ...$rightPropertyPath);
+        $leftPropertyPathInstance = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, ...$leftProperties);
+        $rightPropertyPathInstance = new PropertyPath($rightEntityClass, $salt, PropertyPathAccessInterface::UNPACK, ...$rightProperties);
         return new AllEqual(
             new Property($leftPropertyPathInstance),
             new Property($rightPropertyPathInstance)
@@ -146,7 +145,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, $property, ...$properties);
         return new StringContains(
             new LowerCase(new Property($propertyPath)),
-            new LowerCase(new Value("$value"))
+            new LowerCase(new Value($value))
         );
     }
 
@@ -168,8 +167,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
     /**
      * Accesses a property to evaluate if it is set to `null` or not.
      * This is done using this separate condition class and not {@link AllEqual}
-     * as in SQL (and DQL)
-     * `null` denotes an unknown value and thus `null` does never equals
+     * as in SQL (and DQL) `null` denotes an unknown value and thus `null` does never equal
      * `null`. Using {@link AllEqual} with `null` as value would thus always
      * evaluate to `false`.
      *
@@ -349,7 +347,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
         // a separate join and corresponding condition for each given value. By setting a different
         // salt for each PropertyPath they will result in separate joins to different columns, even
         // though they are all based on the same given property path.
-        $propertyPaths = PropertyPath::createIndexSaltedPaths(count($values), PropertyPath::DIRECT, $property, ...$properties);
+        $propertyPaths = PropertyPath::createIndexSaltedPaths(count($values), PropertyPathAccessInterface::DIRECT, $property, ...$properties);
         // Each $propertyPath now corresponds to a different value in $values and accesses a
         // different column as explained above. Hence, we can create a separate condition for each
         // one, each being responsible for a single value in $values.

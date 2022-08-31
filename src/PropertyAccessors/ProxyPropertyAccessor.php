@@ -9,6 +9,7 @@ use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\Proxy;
 use EDT\Querying\PropertyAccessors\ReflectionPropertyAccessor;
 use ReflectionException;
+use function get_class;
 
 class ProxyPropertyAccessor extends ReflectionPropertyAccessor
 {

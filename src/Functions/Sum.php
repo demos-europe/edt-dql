@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\Functions;
 
-use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\Query\Expr\Comparison;
 use Doctrine\ORM\Query\Expr\Composite;
 use Doctrine\ORM\Query\Expr\Func;
@@ -12,17 +11,10 @@ use Doctrine\ORM\Query\Expr\Math;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 
 /**
- * @template-implements ClauseFunctionInterface<numeric>
+ * @template-extends AbstractClauseFunction<numeric>
  */
-class Sum extends \EDT\Querying\Functions\Sum implements ClauseFunctionInterface
+class Sum extends AbstractClauseFunction
 {
-    use ClauseBasedTrait;
-
-    /**
-     * @var Expr
-     */
-    private $expr;
-
     /**
      * @phpstan-param ClauseFunctionInterface<numeric> $firstAddend
      * @phpstan-param ClauseFunctionInterface<numeric> $secondAddend
@@ -30,16 +22,21 @@ class Sum extends \EDT\Querying\Functions\Sum implements ClauseFunctionInterface
      */
     public function __construct(ClauseFunctionInterface $firstAddend, ClauseFunctionInterface $secondAddend, ClauseFunctionInterface ...$additionalAddends)
     {
-        parent::__construct($firstAddend, $secondAddend, ...$additionalAddends);
-        $this->setClauses($firstAddend, $secondAddend, ...$additionalAddends);
-        $this->expr = new Expr();
+        parent::__construct(
+            new \EDT\Querying\Functions\Sum($firstAddend, $secondAddend, ...$additionalAddends),
+            $firstAddend, $secondAddend, ...$additionalAddends
+        );
     }
 
     public function asDql(array $valueReferences, array $propertyAliases)
     {
         $dqlClauses = $this->getDqls($valueReferences, $propertyAliases);
         $initial = array_shift($dqlClauses);
-        return array_reduce($dqlClauses, [$this, 'sumReduce'], $initial);
+        $sumDql = array_reduce($dqlClauses, [$this, 'sumReduce'], $initial);
+        if (null === $sumDql) {
+            throw new \InvalidArgumentException('Not enough DQL clauses to create SUM expression.');
+        }
+        return $sumDql;
     }
 
     /**

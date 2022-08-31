@@ -4,28 +4,27 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\Functions;
 
-use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\Query\Expr\Func;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 
 /**
- * @template-implements ClauseFunctionInterface<string>
+ * @template-extends AbstractClauseFunction<string|null>
  */
-class UpperCase extends \EDT\Querying\Functions\UpperCase implements ClauseFunctionInterface
+class UpperCase extends AbstractClauseFunction
 {
-    use ClauseBasedTrait;
-
     /**
-     * @param ClauseFunctionInterface<string> $baseFunction
+     * @param ClauseFunctionInterface<string|null> $baseFunction
      */
     public function __construct(ClauseFunctionInterface $baseFunction)
     {
-        parent::__construct($baseFunction);
-        $this->setClauses($baseFunction);
+        parent::__construct(
+            new \EDT\Querying\Functions\UpperCase($baseFunction),
+            $baseFunction
+        );
     }
 
     public function asDql(array $valueReferences, array $propertyAliases): Func
     {
-        return (new Expr())->upper($this->getOnlyClause()->asDql($valueReferences, $propertyAliases));
+        return $this->expr->upper($this->getOnlyClause()->asDql($valueReferences, $propertyAliases));
     }
 }

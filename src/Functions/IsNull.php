@@ -4,28 +4,27 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\Functions;
 
-use Doctrine\ORM\Query\Expr;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 
 /**
- * @template-implements ClauseFunctionInterface<bool>
+ * @template-extends AbstractClauseFunction<bool>
  */
-class IsNull extends \EDT\Querying\Functions\IsNull implements ClauseFunctionInterface
+class IsNull extends AbstractClauseFunction
 {
-    use ClauseBasedTrait;
-
     /**
      * @param ClauseFunctionInterface<mixed> $baseFunction
      */
     public function __construct(ClauseFunctionInterface $baseFunction)
     {
-        parent::__construct($baseFunction);
-        $this->setClauses($baseFunction);
+        parent::__construct(
+            new \EDT\Querying\Functions\IsNull($baseFunction),
+            $baseFunction
+        );
     }
 
     public function asDql(array $valueReferences, array $propertyAliases)
     {
         $maybeNull = $this->getOnlyClause()->asDql($valueReferences, $propertyAliases);
-        return (new Expr())->isNull($maybeNull);
+        return $this->expr->isNull($maybeNull);
     }
 }

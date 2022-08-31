@@ -8,19 +8,19 @@ use Countable;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 
 /**
- * @template-implements ClauseFunctionInterface<int>
+ * @template-extends AbstractClauseFunction<int>
  */
-class Size extends \EDT\Querying\Functions\Size implements ClauseFunctionInterface
+class Size extends AbstractClauseFunction
 {
-    use ClauseBasedTrait;
-
     /**
-     * @param ClauseFunctionInterface<Countable|array<mixed>> $baseFunction
+     * @param ClauseFunctionInterface<Countable|array<int|string, mixed>> $baseFunction
      */
     public function __construct(ClauseFunctionInterface $baseFunction)
     {
-        parent::__construct($baseFunction);
-        $this->setClauses($baseFunction);
+        parent::__construct(
+            new \EDT\Querying\Functions\Size($baseFunction),
+            $baseFunction
+        );
     }
 
     public function asDql(array $valueReferences, array $propertyAliases): string

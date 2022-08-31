@@ -44,7 +44,7 @@ $queryBuilder = $this->getEntityManager()->createQueryBuilder()
     ->setParameter('authorName', 'Charles Dickens');
 ```
 
-However this query is erroneous because the same alias for two different
+However, this query is erroneous because the same alias for two different
 joins (both leading to the `Person` entity) is used.
 Once in the join to `Book.author` and once for the join to `Book.editor`.
 To differentiate the paths we generate prefixes for the entity aliases.

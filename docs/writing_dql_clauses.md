@@ -127,7 +127,7 @@ denotes the books the author has written.
 When using property paths it is relevant
 if the last property should be accessed as a simple
 value (e.g. `['name']` property) or as a set of values
-(eg. the `['books']` to-many relationship). If the last property is not a
+(e.g. the `['books']` to-many relationship). If the last property is not a
 set anyway this does not matter but for the
 case it is we must define the desired behavior.
 
@@ -143,7 +143,7 @@ Using the examples above both the `['name']` path
 and `['books', 'title']` path ends in
 a simple string value and thus `getAccessDepth()` is ignored, even if
 to-many relationships like `'books'` are defined before the last property.
-Meanwhile the path
+Meanwhile, the path
 `['books']` ends in a relationship. When `PropertyIsEmpty` is used with that
 last path we assume the user does not ask if each individual book in the
 author-to-books relationship is empty but if the number of books the author has written
@@ -192,7 +192,7 @@ class PropertyHasValue implements ClauseInterface
 }
 ```
 
-We returned exactly one value and exactly one property path and thus we can expect exactly
+We returned exactly one value and exactly one property path, and thus we can expect exactly
 one corresponding value reference in the `$valueReferences` array and one corresponding
 property alias in the `$propertyAliases` array given as parameters into the `asDql` method.
 
@@ -214,7 +214,7 @@ created join
 * `$valueReferences[0]` will be `'?0'` – accessing the first (and only) query
 parameter using its index in the parameter list
 
-Thus the result of the `asDql` call would be
+Thus, the result of the `asDql` call would be
 ```dql
 t_4acb7013_Birth.street = ?0
 ```
@@ -290,7 +290,7 @@ are sorted with a path like `['author', 'name']` each
 book has only one author name and thus the books can be sorted
 in a deterministic order. But when authors are sorted
 with a path like `['books', 'title']` a single author may
-result in multiple book titles and it is not clear
+result in multiple book titles, and it is not clear
 which book title should represent the author to compare the author with other authors.
 This problem results directly from the relational
 model and is present in stock SQL too but can be
@@ -406,7 +406,7 @@ must be used correctly to enclose it when used inside a multiplication. Because 
 `Math` instances are nested in each other we get indeed the correct result: `(1 * (7 + 8)) * (5 + 3)`.
 
 But in the following example we strictly defined the types of the anonymous function to be
-`string`s. Because of this the `Math::__toString()` method will be implicitly invoked and
+`string`s. Because of this the `Math::__toString()` method will be implicitly invoked, and
 we do not pass `Math` instances into the `prod` method anymore but `string` values instead.
 As a simple `string` is passed Doctrine will assume that no brackets are needed and will return the (wrong) result `1 * 7 + 8 * 5 + 3`.
 

@@ -4,29 +4,28 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\Functions;
 
-use Doctrine\ORM\Query\Expr;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 
 /**
- * @template-implements ClauseFunctionInterface<bool>
+ * @template-extends AbstractClauseFunction<bool>
  */
-class BetweenInclusive extends \EDT\Querying\Functions\BetweenInclusive implements ClauseFunctionInterface
+class BetweenInclusive extends AbstractClauseFunction
 {
-    use ClauseBasedTrait;
-
     /**
      * @phpstan-param ClauseFunctionInterface<numeric> $min
      * @phpstan-param ClauseFunctionInterface<numeric> $max
      * @phpstan-param ClauseFunctionInterface<numeric> $value
      */
     public function __construct(ClauseFunctionInterface $min, ClauseFunctionInterface $max, ClauseFunctionInterface $value) {
-        parent::__construct($min, $max, $value);
-        $this->setClauses($min, $max, $value);
+        parent::__construct(
+            new \EDT\Querying\Functions\BetweenInclusive($min, $max, $value),
+            $min, $max, $value
+        );
     }
 
     public function asDql(array $valueReferences, array $propertyAliases)
     {
         [$min, $max, $value] = $this->getDqls($valueReferences, $propertyAliases);
-        return (new Expr())->between($value, $min, $max);
+        return $this->expr->between($value, $min, $max);
     }
 }

@@ -4,25 +4,24 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\Functions;
 
-use Doctrine\ORM\Query\Expr;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 
 /**
- * @template-implements ClauseFunctionInterface<bool>
+ * @template-extends AbstractClauseFunction<bool>
  */
-class Greater extends \EDT\Querying\Functions\Greater implements ClauseFunctionInterface
+class Greater extends AbstractClauseFunction
 {
-    use ClauseBasedTrait;
-
     public function __construct(ClauseFunctionInterface $left, ClauseFunctionInterface $right)
     {
-        parent::__construct($left, $right);
-        $this->setClauses($left, $right);
+        parent::__construct(
+            new \EDT\Querying\Functions\Greater($left, $right),
+            $left, $right
+        );
     }
 
     public function asDql(array $valueReferences, array $propertyAliases)
     {
         [$left, $right] = $this->getDqls($valueReferences, $propertyAliases);
-        return (new Expr())->gt($left, $right);
+        return $this->expr->gt($left, $right);
     }
 }

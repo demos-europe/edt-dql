@@ -187,6 +187,8 @@ class QueryBuilderPreparer
     }
 
     /**
+     * @param mixed $orderByDql
+     *
      * @throws MappingException
      */
     protected function createOrderBy($orderByDql, OrderByInterface $sortClause): OrderBy
@@ -275,20 +277,19 @@ class QueryBuilderPreparer
             $properties,
             $entityAlias
         );
-        $lastPropertyWasRelationship = count($neededJoins) === $originalPathLength;
+        $joinCount = count($neededJoins);
+        $lastPropertyWasRelationship = $joinCount === $originalPathLength;
 
-        if (0 !== count($neededJoins)) {
+        if (0 !== $joinCount) {
             // Add the joins found for this condition to all joins found so far.
             // Will override duplicated keys, this is ok, as we expect the key
             // to be the join alias and the join alias to be unique except
             // it actually corresponds to the exactly same join clause.
             $this->joinClauses = array_merge($this->joinClauses, $neededJoins);
 
-            // As there were joins needed to access the property the accessed entity is now the last
-            // join determined above.
-            /** @var Join $lastJoin */
-            $lastJoin = array_pop($neededJoins);
-            $entityAlias = $lastJoin->getAlias();
+            // As there were joins needed to access the property the accessed entity is now the
+            // alias of the last join determined above.
+            $entityAlias = array_key_last($neededJoins);
 
             // If the condition needs to access a property directly on the entity we append the
             // property name to the entity alias.
@@ -332,10 +333,9 @@ class QueryBuilderPreparer
      */
     private function setJoins(QueryBuilder $queryBuilder): void
     {
-        foreach ($this->joinClauses as $joinObject) {
+        foreach ($this->joinClauses as $alias => $joinObject) {
             $joinType = $joinObject->getJoinType();
             $join = $joinObject->getJoin();
-            $alias = $joinObject->getAlias();
             $conditionType = $joinObject->getConditionType();
             $condition = $joinObject->getCondition();
             $indexBy = $joinObject->getIndexBy();

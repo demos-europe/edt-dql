@@ -32,6 +32,9 @@ class MappingException extends Exception
         return new self("Path defines the class context '$context' with the alias '$contextAlias', but that alias is already in use for the class context '$existingContext'.");
     }
 
+    /**
+     * @param array<int, string> $path
+     */
     public static function duplicatedAlias(?string $alias, array $path, string $salt): self
     {
         $pathString = implode('.', $path);
