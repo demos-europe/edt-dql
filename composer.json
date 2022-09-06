@@ -6,7 +6,7 @@
     "require": {
         "doctrine/orm": "^2.5",
         "php": ">=7.3,<8.2",
-        "demos-europe/edt-queries": "^0.7.1"
+        "demos-europe/edt-queries": "^0.8"
     },
     "authors": [
         {
@@ -25,11 +25,7 @@
         }
     },
     "require-dev": {
-        "doctrine/cache": "^1.11",
-        "phpstan/phpstan": "^0.12.54",
-        "phpstan/phpstan-strict-rules": "^0.12.5",
-        "vimeo/psalm": "^4.1",
-        "repman-io/composer-plugin": "^1.1"
+        "doctrine/cache": "^1.11"
     },
     "conflict": {
         "demos-europe/edt-extra": "<0.7.1",

@@ -52,9 +52,9 @@ This allows dynamically receiving queries and directly executing them in the dat
 ## Conditions
 
 Beside the `PropertyHasValue` shown above more condition types are supported.
-All conditions provided by the library can be found and created using the [`DqlConditionFactory`](../src/DqlQuerying/ConditionFactories/DqlConditionFactory.php) class.
+All conditions provided by the library can be found and created using the `DqlConditionFactory` class.
 
-If the provided conditions do not suffice you can [write you own clauses](writing_dql_clauses.md) by implementing [`ClauseInterface`](../src/DqlQuerying/Contracts/ClauseInterface.php).
+If the provided conditions do not suffice you can [write you own clauses](writing_dql_clauses.md) by implementing `ClauseInterface`.
 
 ### Condition Nesting
 
@@ -89,3 +89,7 @@ return $queryGenerator->generateQueryBuilder(Book::class, [$condition], $sortMet
 ```
 
 If the provided sort implementations do not suffice you can [write you own sort implementation](writing_dql_clauses.md#OrderByInterface). 
+
+## Credits and acknowledgements
+
+Conception and implementation by Christian Dressler with many thanks to [eFrane](https://github.com/eFrane).
