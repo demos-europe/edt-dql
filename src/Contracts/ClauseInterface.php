@@ -38,7 +38,7 @@ interface ClauseInterface extends PathsBasedInterface
      * * contain a single value (e.g. in case of an equality comparison)
      * * may contain multiple values (e.g. in case of a between comparison)
      *
-     * @return array<int, mixed>
+     * @return list<mixed>
      */
     public function getClauseValues(): array;
 

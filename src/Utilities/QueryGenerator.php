@@ -24,10 +24,10 @@ class QueryGenerator
     }
 
     /**
-     * @param class-string                  $entityClass
-     * @param array<int,ClauseInterface>    $conditions
-     * @param array<int,OrderByInterface>   $sortMethods
-     * @param array<string,ClauseInterface> $selections
+     * @param class-string                            $entityClass
+     * @param list<ClauseInterface>                   $conditions
+     * @param list<OrderByInterface>                  $sortMethods
+     * @param array<non-empty-string,ClauseInterface> $selections
      *
      * @throws MappingException
      * @throws SliceException

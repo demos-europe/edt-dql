@@ -27,7 +27,7 @@ abstract class AbstractClauseFunction implements ClauseFunctionInterface
     private $function;
 
     /**
-     * @var array<int, ClauseInterface>
+     * @var list<ClauseInterface>
      */
     protected $clauses = [];
 
@@ -80,7 +80,7 @@ abstract class AbstractClauseFunction implements ClauseFunctionInterface
      * @param string[] $valueReferences
      * @param string[] $propertyAliases
      *
-     * @return array<int,Comparison|Func|Math|Base|string>
+     * @return list<Comparison|Func|Math|Base|string>
      */
     protected function getDqls(array $valueReferences, array $propertyAliases): array
     {

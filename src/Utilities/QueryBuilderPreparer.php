@@ -54,7 +54,7 @@ class QueryBuilderPreparer
      *
      * Will be filled while creating the {@link QueryBuilderPreparer::$conditions}.
      *
-     * @var array<int,mixed>
+     * @var list<mixed>
      */
     private $parameters = [];
 
@@ -67,7 +67,7 @@ class QueryBuilderPreparer
     private $mainClassMetadata;
 
     /**
-     * @var array<int,ClauseInterface>
+     * @var list<ClauseInterface>
      */
     private $conditions = [];
 

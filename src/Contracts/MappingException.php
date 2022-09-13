@@ -33,7 +33,7 @@ class MappingException extends Exception
     }
 
     /**
-     * @param array<int, string> $path
+     * @param list<string> $path
      */
     public static function duplicatedAlias(?string $alias, array $path, string $salt): self
     {

@@ -8,29 +8,23 @@ use EDT\DqlQuerying\Functions\Property;
 use EDT\DqlQuerying\SortMethods\Ascending;
 use EDT\DqlQuerying\SortMethods\Descending;
 use EDT\DqlQuerying\Contracts\OrderBySortMethodInterface;
-use EDT\Querying\Contracts\PathException;
+use EDT\Querying\Contracts\PathsBasedInterface;
 use EDT\Querying\Contracts\PropertyPathAccessInterface;
 use EDT\Querying\Contracts\SortMethodFactoryInterface;
-use EDT\Querying\Contracts\SortMethodInterface;
 use EDT\Querying\PropertyPaths\PropertyPath;
 
+/**
+ * @template-implements SortMethodFactoryInterface<OrderBySortMethodInterface>
+ */
 class SortMethodFactory implements SortMethodFactoryInterface
 {
-    /**
-     * @return OrderBySortMethodInterface
-     * @throws PathException
-     */
-    public function propertyAscending(string $property, string ...$properties): SortMethodInterface
+    public function propertyAscending(string $property, string ...$properties): PathsBasedInterface
     {
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK_RECURSIVE, $property, ...$properties);
         return new Ascending(new Property($propertyPath));
     }
 
-    /**
-     * @return OrderBySortMethodInterface
-     * @throws PathException
-     */
-    public function propertyDescending(string $property, string ...$properties): SortMethodInterface
+    public function propertyDescending(string $property, string ...$properties): PathsBasedInterface
     {
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK_RECURSIVE, $property, ...$properties);
         return new Descending(new Property($propertyPath));

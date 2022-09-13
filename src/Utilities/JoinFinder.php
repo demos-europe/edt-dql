@@ -87,7 +87,7 @@ class JoinFinder
      *                         segments in this path from segments in other paths that use the same
      *                         table name
      *
-     * @return array<int,Join>
+     * @return list<Join>
      * @throws MappingException
      * @throws OrmMappingException
      */

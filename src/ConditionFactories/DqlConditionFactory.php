@@ -26,8 +26,8 @@ use EDT\DqlQuerying\Functions\Property;
 use EDT\DqlQuerying\Functions\Size;
 use EDT\DqlQuerying\Functions\Value;
 use EDT\Querying\Contracts\ConditionFactoryInterface;
-use EDT\Querying\Contracts\FunctionInterface;
 use EDT\Querying\Contracts\PathException;
+use EDT\Querying\Contracts\PathsBasedInterface;
 use EDT\Querying\Contracts\PropertyPathAccessInterface;
 use EDT\Querying\PropertyPaths\PropertyPath;
 use function count;
@@ -40,7 +40,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
     /**
      * @return ClauseFunctionInterface<bool>
      */
-    public function false(): FunctionInterface
+    public function false(): PathsBasedInterface
     {
         // using 'false' here as DQL value does not work with some database drivers
         return new Constant(false, '1 = 2');
@@ -49,32 +49,32 @@ class DqlConditionFactory implements ConditionFactoryInterface
     /**
      * @return ClauseFunctionInterface<bool>
      */
-    public function true(): FunctionInterface
+    public function true(): PathsBasedInterface
     {
         // using 'true' here does not work with some database drivers
         return new Constant(true, '1 = 1');
     }
 
     /**
-     * @param ClauseFunctionInterface<bool> $firstFunction
-     * @param ClauseFunctionInterface<bool> ...$additionalClauses
+     * @param ClauseFunctionInterface<bool> $firstCondition
+     * @param ClauseFunctionInterface<bool> ...$additionalConditions
      *
      * @return ClauseFunctionInterface<bool>
      */
-    public function allConditionsApply(FunctionInterface $firstFunction, FunctionInterface ...$additionalClauses): FunctionInterface
+    public function allConditionsApply(PathsBasedInterface $firstCondition, PathsBasedInterface ...$additionalConditions): PathsBasedInterface
     {
-        return new AllTrue($firstFunction, ...$additionalClauses);
+        return new AllTrue($firstCondition, ...$additionalConditions);
     }
 
     /**
-     * @param ClauseFunctionInterface<bool> $firstFunction
-     * @param ClauseFunctionInterface<bool> ...$additionalFunctions
+     * @param ClauseFunctionInterface<bool> $firstCondition
+     * @param ClauseFunctionInterface<bool> ...$additionalConditions
      *
      * @return ClauseFunctionInterface<bool>
      */
-    public function anyConditionApplies(FunctionInterface $firstFunction, FunctionInterface ...$additionalFunctions): FunctionInterface
+    public function anyConditionApplies(PathsBasedInterface $firstCondition, PathsBasedInterface ...$additionalConditions): PathsBasedInterface
     {
-        return new AnyTrue($firstFunction, ...$additionalFunctions);
+        return new AnyTrue($firstCondition, ...$additionalConditions);
     }
 
     /**
@@ -83,7 +83,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
      * @return ClauseFunctionInterface<bool>
      * @throws PathException
      */
-    public function propertiesEqual(array $leftProperties, array $rightProperties, string $rightEntityClass = null, string $salt = ''): FunctionInterface
+    public function propertiesEqual(array $leftProperties, array $rightProperties, string $rightEntityClass = null, string $salt = ''): PathsBasedInterface
     {
         $leftPropertyPathInstance = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, ...$leftProperties);
         $rightPropertyPathInstance = new PropertyPath($rightEntityClass, $salt, PropertyPathAccessInterface::UNPACK, ...$rightProperties);
@@ -99,9 +99,9 @@ class DqlConditionFactory implements ConditionFactoryInterface
      * @return ClauseFunctionInterface<bool>
      * @throws PathException
      */
-    public function propertyBetweenValuesInclusive($min, $max, string $property, string ...$propertyPath): FunctionInterface
+    public function propertyBetweenValuesInclusive($min, $max, string $property, string ...$properties): PathsBasedInterface
     {
-        $propertyPathInstance = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, $property, ...$propertyPath);
+        $propertyPathInstance = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, $property, ...$properties);
         return new BetweenInclusive(
             new Value($min),
             new Value($max),
@@ -113,7 +113,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
      * @return ClauseFunctionInterface<bool>
      * @throws PathException
      */
-    public function propertyHasAnyOfValues(array $values, string $property, string ...$properties): FunctionInterface
+    public function propertyHasAnyOfValues(array $values, string $property, string ...$properties): PathsBasedInterface
     {
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, $property, ...$properties);
         if ([] === $values) {
@@ -127,7 +127,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
      * @return ClauseFunctionInterface<bool>
      * @throws PathException
      */
-    public function propertyHasSize(int $size, string $property, string ...$properties): FunctionInterface
+    public function propertyHasSize(int $size, string $property, string ...$properties): PathsBasedInterface
     {
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::DIRECT, $property, ...$properties);
         return new AllEqual(
@@ -140,7 +140,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
      * @return ClauseFunctionInterface<bool>
      * @throws PathException
      */
-    public function propertyHasStringContainingCaseInsensitiveValue(string $value, string $property, string ...$properties): FunctionInterface
+    public function propertyHasStringContainingCaseInsensitiveValue(string $value, string $property, string ...$properties): PathsBasedInterface
     {
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, $property, ...$properties);
         return new StringContains(
@@ -155,7 +155,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
      * @return ClauseFunctionInterface<bool>
      * @throws PathException
      */
-    public function propertyHasValue($value, string $property, string ...$properties): FunctionInterface
+    public function propertyHasValue($value, string $property, string ...$properties): PathsBasedInterface
     {
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, $property, ...$properties);
         return new AllEqual(
@@ -174,7 +174,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
      * @return ClauseFunctionInterface<bool>
      * @throws PathException
      */
-    public function propertyIsNull(string $property, string ...$properties): FunctionInterface
+    public function propertyIsNull(string $property, string ...$properties): PathsBasedInterface
     {
         /**
          * In theory the condition `Person.birthplace is null` does not need a join to the `Address`
@@ -190,7 +190,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
      * @return ClauseFunctionInterface<bool>
      * @throws PathException
      */
-    public function propertyHasStringAsMember(string $value, string $property, string ...$properties): FunctionInterface
+    public function propertyHasStringAsMember(string $value, string $property, string ...$properties): PathsBasedInterface
     {
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::DIRECT, $property, ...$properties);
         return new IsMemberOf(
@@ -205,7 +205,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
      * @return ClauseFunctionInterface<bool>
      * @throws PathException
      */
-    public function valueGreaterThan($value, string $property, string ...$properties): FunctionInterface
+    public function valueGreaterThan($value, string $property, string ...$properties): PathsBasedInterface
     {
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::DIRECT, $property, ...$properties);
         return new Greater(
@@ -220,7 +220,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
      * @return ClauseFunctionInterface<bool>
      * @throws PathException
      */
-    public function valueGreaterEqualsThan($value, string $property, string ...$properties): FunctionInterface
+    public function valueGreaterEqualsThan($value, string $property, string ...$properties): PathsBasedInterface
     {
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::DIRECT, $property, ...$properties);
         return new GreaterEquals(
@@ -234,7 +234,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
      * @return ClauseFunctionInterface<bool>
      * @throws PathException
      */
-    public function valueSmallerThan($value, string $property, string ...$properties): FunctionInterface
+    public function valueSmallerThan($value, string $property, string ...$properties): PathsBasedInterface
     {
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::DIRECT, $property, ...$properties);
         return new Smaller(
@@ -249,7 +249,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
      * @return ClauseFunctionInterface<bool>
      * @throws PathException
      */
-    public function valueSmallerEqualsThan($value, string $property, string ...$properties): FunctionInterface
+    public function valueSmallerEqualsThan($value, string $property, string ...$properties): PathsBasedInterface
     {
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::DIRECT, $property, ...$properties);
         return new SmallerEquals(
@@ -262,7 +262,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
      * @return ClauseFunctionInterface<bool>
      * @throws PathException
      */
-    public function propertyStartsWithCaseInsensitive(string $value, string $property, string ...$properties): FunctionInterface
+    public function propertyStartsWithCaseInsensitive(string $value, string $property, string ...$properties): PathsBasedInterface
     {
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::DIRECT, $property, ...$properties);
         return new StringStartsWith(
@@ -275,7 +275,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
      * @return ClauseFunctionInterface<bool>
      * @throws PathException
      */
-    public function propertyEndsWithCaseInsensitive(string $value, string $property, string ...$properties): FunctionInterface
+    public function propertyEndsWithCaseInsensitive(string $value, string $property, string ...$properties): PathsBasedInterface
     {
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::DIRECT, $property, ...$properties);
         return new StringEndsWith(
@@ -337,8 +337,10 @@ class DqlConditionFactory implements ConditionFactoryInterface
      * Based on this we can generate a condition that results in
      * `… WHERE book_title_0 = 'A' AND book_title_1 = 'B'`, which matches only `Joe`,
      * as it should be.
+     *
+     * @throws PathException
      */
-    public function allValuesPresentInMemberListProperties(array $values, string $property, string ...$properties): FunctionInterface
+    public function allValuesPresentInMemberListProperties(array $values, string $property, string ...$properties): PathsBasedInterface
     {
         // When building the DQL joins duplications will be avoided by default. I.e. if the
         // same property path is used in multiple conditions the corresponding join is
@@ -360,32 +362,32 @@ class DqlConditionFactory implements ConditionFactoryInterface
         return new AllTrue(...$equalityConditions);
     }
 
-    public function propertyHasNotAnyOfValues(array $values, string $property, string ...$properties): FunctionInterface
+    public function propertyHasNotAnyOfValues(array $values, string $property, string ...$properties): PathsBasedInterface
     {
         return new InvertedBoolean($this->propertyHasAnyOfValues($values, $property, ...$properties));
     }
 
-    public function propertyHasNotSize(int $size, string $property, string ...$properties): FunctionInterface
+    public function propertyHasNotSize(int $size, string $property, string ...$properties): PathsBasedInterface
     {
         return new InvertedBoolean($this->propertyHasSize($size, $property, ...$properties));
     }
 
-    public function propertyNotBetweenValuesInclusive($min, $max, string $property, string ...$properties): FunctionInterface
+    public function propertyNotBetweenValuesInclusive($min, $max, string $property, string ...$properties): PathsBasedInterface
     {
         return new InvertedBoolean($this->propertyBetweenValuesInclusive($min, $max, $property, ...$properties));
     }
 
-    public function propertyHasNotValue($value, string $property, string ...$properties): FunctionInterface
+    public function propertyHasNotValue($value, string $property, string ...$properties): PathsBasedInterface
     {
         return new InvertedBoolean($this->propertyHasValue($value, $property, ...$properties));
     }
 
-    public function propertyIsNotNull(string $property, string ...$properties): FunctionInterface
+    public function propertyIsNotNull(string $property, string ...$properties): PathsBasedInterface
     {
         return new InvertedBoolean($this->propertyIsNull($property, ...$properties));
     }
 
-    public function propertyHasNotStringAsMember(string $value, string $property, string ...$properties): FunctionInterface
+    public function propertyHasNotStringAsMember(string $value, string $property, string ...$properties): PathsBasedInterface
     {
         return new InvertedBoolean($this->propertyHasStringAsMember($value, $property, ...$properties));
     }
