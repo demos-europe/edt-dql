@@ -95,14 +95,15 @@ abstract class AbstractClauseFunction implements ClauseFunctionInterface
      * Splits a flat array of value references into a nested array with each index
      * of the outer array corresponding to the same index in {@link AbstractClauseFunction::clauses}.
      *
-     * @return string[][]
+     * @return list<list<string>>
      */
     protected function unflatClauseReferences(string ...$valueReferences): array
     {
         $clauseValueCountables = array_map(static function (ClauseInterface $clause): int {
             return count($clause->getClauseValues());
         }, $this->clauses);
-        return Iterables::split($valueReferences, false, ...$clauseValueCountables);
+
+        return array_map('array_values', Iterables::split($valueReferences, ...$clauseValueCountables));
     }
 
     /**
@@ -120,13 +121,14 @@ abstract class AbstractClauseFunction implements ClauseFunctionInterface
      * Splits a flat array of property aliases into a nested array with each index
      * of the outer array corresponding to the same index in {@link AbstractClauseFunction::clauses}.
      *
-     * @return string[][]
+     * @return list<list<string>>
      */
     private function unflatPropertyAliases(string ...$propertyAliases): array
     {
         $propertyAliasCountables = array_map(static function (PathsBasedInterface $pathsBased): int {
             return count($pathsBased->getPropertyPaths());
         }, $this->clauses);
-        return Iterables::split($propertyAliases, false, ...$propertyAliasCountables);
+
+        return array_map('array_values', Iterables::split($propertyAliases, ...$propertyAliasCountables));
     }
 }
