@@ -10,29 +10,29 @@ use EDT\DqlQuerying\Contracts\ClauseInterface;
 use EDT\DqlQuerying\Contracts\MappingException;
 use EDT\DqlQuerying\Utilities\QueryGenerator;
 use EDT\DqlQuerying\Contracts\OrderByInterface;
-use EDT\Querying\Pagination\OffsetBasedPagination;
+use EDT\Querying\Pagination\OffsetPagination;
 use EDT\Querying\Contracts\ObjectProviderInterface;
-use EDT\Querying\Contracts\SliceException;
-use EDT\Querying\EntityProviders\OffsetBasedEntityProviderInterface;
+use EDT\Querying\Contracts\PaginationException;
+use EDT\Querying\EntityProviders\OffsetPaginatingEntityProviderInterface;
 
 /**
- * @template T of object
- * @template-implements ObjectProviderInterface<ClauseInterface, OrderByInterface, T>
- * @template-implements OffsetBasedEntityProviderInterface<ClauseInterface, OrderByInterface, T>
+ * @template TEntity of object
+ * @template-implements ObjectProviderInterface<ClauseInterface, OrderByInterface, TEntity>
+ * @template-implements OffsetPaginatingEntityProviderInterface<ClauseInterface, OrderByInterface, TEntity>
  */
-class DoctrineOrmEntityProvider implements ObjectProviderInterface, OffsetBasedEntityProviderInterface
+class DoctrineOrmEntityProvider implements ObjectProviderInterface, OffsetPaginatingEntityProviderInterface
 {
     /**
      * @var QueryGenerator
      */
     private $queryGenerator;
     /**
-     * @var class-string<T>
+     * @var class-string<TEntity>
      */
     private $className;
 
     /**
-     * @phpstan-param class-string<T> $className
+     * @param class-string<TEntity> $className
      */
     public function __construct(string $className, EntityManager $entityManager)
     {
@@ -42,7 +42,7 @@ class DoctrineOrmEntityProvider implements ObjectProviderInterface, OffsetBasedE
 
     /**
      * @throws MappingException
-     * @throws SliceException
+     * @throws PaginationException
      */
     public function getObjects(array $conditions, array $sortMethods = [], int $offset = 0, int $limit = null): iterable
     {
@@ -51,14 +51,14 @@ class DoctrineOrmEntityProvider implements ObjectProviderInterface, OffsetBasedE
     }
 
     /**
-     * @param list<ClauseInterface>      $conditions
-     * @param list<OrderByInterface>     $sortMethods
-     * @param OffsetBasedPagination|null $pagination
+     * @param list<ClauseInterface>  $conditions
+     * @param list<OrderByInterface> $sortMethods
+     * @param OffsetPagination|null  $pagination
      *
-     * @return iterable<T>
+     * @return iterable<TEntity>
      *
      * @throws MappingException
-     * @throws SliceException
+     * @throws PaginationException
      */
     public function getEntities(array $conditions, array $sortMethods, ?object $pagination): iterable
     {
@@ -79,7 +79,7 @@ class DoctrineOrmEntityProvider implements ObjectProviderInterface, OffsetBasedE
      * @param list<OrderByInterface> $sortMethods
      *
      * @throws MappingException
-     * @throws SliceException
+     * @throws PaginationException
      */
     public function generateQueryBuilder(array $conditions, array $sortMethods = [], int $offset = 0, int $limit = null): QueryBuilder
     {

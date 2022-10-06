@@ -16,9 +16,9 @@ use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 class Sum extends AbstractClauseFunction
 {
     /**
-     * @phpstan-param ClauseFunctionInterface<numeric> $firstAddend
-     * @phpstan-param ClauseFunctionInterface<numeric> $secondAddend
-     * @phpstan-param ClauseFunctionInterface<numeric> ...$additionalAddends
+     * @param ClauseFunctionInterface<numeric> $firstAddend
+     * @param ClauseFunctionInterface<numeric> $secondAddend
+     * @param ClauseFunctionInterface<numeric> ...$additionalAddends
      */
     public function __construct(ClauseFunctionInterface $firstAddend, ClauseFunctionInterface $secondAddend, ClauseFunctionInterface ...$additionalAddends)
     {

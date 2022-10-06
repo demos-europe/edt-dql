@@ -16,13 +16,13 @@ use EDT\Querying\Contracts\PathsBasedInterface;
 use EDT\Querying\Utilities\Iterables;
 
 /**
- * @template R
- * @template-implements ClauseFunctionInterface<R>
+ * @template TOutput
+ * @template-implements ClauseFunctionInterface<TOutput>
  */
 abstract class AbstractClauseFunction implements ClauseFunctionInterface
 {
     /**
-     * @var FunctionInterface<R>
+     * @var FunctionInterface<TOutput>
      */
     private $function;
 
@@ -43,7 +43,7 @@ abstract class AbstractClauseFunction implements ClauseFunctionInterface
      * one element being the result of the clause. If you passed two clauses the returned array will
      * contain two elements, each being the result of the corresponding clause.
      *
-     * @param FunctionInterface<R> $function
+     * @param FunctionInterface<TOutput> $function
      */
     public function __construct(FunctionInterface $function, ClauseInterface ...$clauses)
     {

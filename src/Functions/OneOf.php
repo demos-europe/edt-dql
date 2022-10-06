@@ -20,8 +20,8 @@ class OneOf extends AbstractClauseFunction
 {
     /**
      * @template V
-     * @phpstan-param ClauseFunctionInterface<array<V>> $contains
-     * @phpstan-param ClauseFunctionInterface<V> $contained
+     * @param ClauseFunctionInterface<array<V>> $contains
+     * @param ClauseFunctionInterface<V>        $contained
      */
     public function __construct(ClauseFunctionInterface $contains, ClauseFunctionInterface $contained)
     {

@@ -9,7 +9,7 @@ use Doctrine\ORM\QueryBuilder;
 use EDT\DqlQuerying\Contracts\ClauseInterface;
 use EDT\DqlQuerying\Contracts\MappingException;
 use EDT\DqlQuerying\Contracts\OrderByInterface;
-use EDT\Querying\Contracts\SliceException;
+use EDT\Querying\Contracts\PaginationException;
 
 class QueryGenerator
 {
@@ -30,7 +30,7 @@ class QueryGenerator
      * @param array<non-empty-string,ClauseInterface> $selections
      *
      * @throws MappingException
-     * @throws SliceException
+     * @throws PaginationException
      */
     public function generateQueryBuilder(string $entityClass, array $conditions, array $sortMethods = [], int $offset = 0, int $limit = null, array $selections = []): QueryBuilder
     {
@@ -45,7 +45,7 @@ class QueryGenerator
         // add offset if needed
         if (0 !== $offset) {
             if (0 > $offset) {
-                throw SliceException::negativeOffset($offset);
+                throw PaginationException::negativeOffset($offset);
             }
             $queryBuilder->setFirstResult($offset);
         }
@@ -53,7 +53,7 @@ class QueryGenerator
         // add limit if needed
         if (null !== $limit) {
             if (0 > $limit) {
-                throw SliceException::negativeLimit($limit);
+                throw PaginationException::negativeLimit($limit);
             }
             $queryBuilder->setMaxResults($limit);
         }

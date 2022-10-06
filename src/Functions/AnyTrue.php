@@ -13,8 +13,8 @@ use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 class AnyTrue extends AbstractClauseFunction
 {
     /**
-     * @phpstan-param ClauseFunctionInterface<bool> $firstFunction
-     * @phpstan-param ClauseFunctionInterface<bool> ...$additionalFunctions
+     * @param ClauseFunctionInterface<bool> $firstFunction
+     * @param ClauseFunctionInterface<bool> ...$additionalFunctions
      */
     public function __construct(ClauseFunctionInterface $firstFunction, ClauseFunctionInterface ...$additionalFunctions)
     {

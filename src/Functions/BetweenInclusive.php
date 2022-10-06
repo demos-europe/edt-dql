@@ -12,9 +12,9 @@ use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 class BetweenInclusive extends AbstractClauseFunction
 {
     /**
-     * @phpstan-param ClauseFunctionInterface<numeric> $min
-     * @phpstan-param ClauseFunctionInterface<numeric> $max
-     * @phpstan-param ClauseFunctionInterface<numeric> $value
+     * @param ClauseFunctionInterface<numeric> $min
+     * @param ClauseFunctionInterface<numeric> $max
+     * @param ClauseFunctionInterface<numeric> $value
      */
     public function __construct(ClauseFunctionInterface $min, ClauseFunctionInterface $max, ClauseFunctionInterface $value) {
         parent::__construct(

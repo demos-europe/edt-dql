@@ -6,7 +6,7 @@
     "require": {
         "doctrine/orm": "^2.5",
         "php": ">=7.3,<8",
-        "demos-europe/edt-queries": "^0.12.15"
+        "demos-europe/edt-queries": "^0.13"
     },
     "authors": [
         {

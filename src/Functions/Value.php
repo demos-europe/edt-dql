@@ -8,9 +8,9 @@ use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 use EDT\Querying\Utilities\Iterables;
 
 /**
- * @template R
- * @template-implements ClauseFunctionInterface<R>
- * @template-extends \EDT\Querying\Functions\Value<R>
+ * @template TOutput
+ * @template-implements ClauseFunctionInterface<TOutput>
+ * @template-extends \EDT\Querying\Functions\Value<TOutput>
  */
 class Value extends \EDT\Querying\Functions\Value implements ClauseFunctionInterface
 {

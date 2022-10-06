@@ -12,9 +12,9 @@ use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 class Product extends AbstractClauseFunction
 {
     /**
-     * @phpstan-param ClauseFunctionInterface<numeric> $firstFactor
-     * @phpstan-param ClauseFunctionInterface<numeric> $secondFactor
-     * @phpstan-param ClauseFunctionInterface<numeric> ...$additionalFactors
+     * @param ClauseFunctionInterface<numeric> $firstFactor
+     * @param ClauseFunctionInterface<numeric> $secondFactor
+     * @param ClauseFunctionInterface<numeric> ...$additionalFactors
      */
     public function __construct(ClauseFunctionInterface $firstFactor, ClauseFunctionInterface $secondFactor, ClauseFunctionInterface ...$additionalFactors)
     {

@@ -7,8 +7,8 @@ namespace EDT\DqlQuerying\Contracts;
 use EDT\Querying\Contracts\FunctionInterface;
 
 /**
- * @template R
- * @template-extends FunctionInterface<R>
+ * @template TOutput
+ * @template-extends FunctionInterface<TOutput>
  */
 interface ClauseFunctionInterface extends ClauseInterface, FunctionInterface
 {

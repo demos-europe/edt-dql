@@ -13,9 +13,9 @@ use EDT\Querying\Utilities\Iterables;
 
 /**
  * @template V of Composite|Math|Func|Comparison|string
- * @template R
- * @template-implements ClauseFunctionInterface<R>
- * @template-extends \EDT\Querying\Functions\Value<R>
+ * @template TOutput
+ * @template-implements ClauseFunctionInterface<TOutput>
+ * @template-extends \EDT\Querying\Functions\Value<TOutput>
  */
 class Constant extends \EDT\Querying\Functions\Value implements ClauseFunctionInterface
 {
@@ -25,7 +25,7 @@ class Constant extends \EDT\Querying\Functions\Value implements ClauseFunctionIn
     private $dqlValue;
 
     /**
-     * @param R $phpValue
+     * @param TOutput $phpValue
      * @param V $dqlValue
      */
     public function __construct($phpValue, $dqlValue)
