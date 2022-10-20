@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\ConditionFactories;
 
+use EDT\ConditionFactory\PathsBasedConditionGroupFactoryInterface;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 use EDT\DqlQuerying\Functions\AllTrue;
 use EDT\DqlQuerying\Functions\AnyTrue;
@@ -25,7 +26,7 @@ use EDT\DqlQuerying\Functions\OneOf;
 use EDT\DqlQuerying\Functions\Property;
 use EDT\DqlQuerying\Functions\Size;
 use EDT\DqlQuerying\Functions\Value;
-use EDT\Querying\Contracts\ConditionFactoryInterface;
+use EDT\ConditionFactory\PathsBasedConditionFactoryInterface;
 use EDT\Querying\Contracts\PathException;
 use EDT\Querying\Contracts\PathsBasedInterface;
 use EDT\Querying\Contracts\PropertyPathAccessInterface;
@@ -33,9 +34,10 @@ use EDT\Querying\PropertyPaths\PropertyPath;
 use function count;
 
 /**
- * @template-implements ConditionFactoryInterface<ClauseFunctionInterface<bool>>
+ * @template-implements PathsBasedConditionFactoryInterface<ClauseFunctionInterface<bool>>
+ * @template-implements PathsBasedConditionGroupFactoryInterface<ClauseFunctionInterface<bool>>
  */
-class DqlConditionFactory implements ConditionFactoryInterface
+class DqlConditionFactory implements PathsBasedConditionFactoryInterface, PathsBasedConditionGroupFactoryInterface
 {
     /**
      * @return ClauseFunctionInterface<bool>
@@ -61,7 +63,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
      *
      * @return ClauseFunctionInterface<bool>
      */
-    public function allConditionsApply(PathsBasedInterface $firstCondition, PathsBasedInterface ...$additionalConditions): PathsBasedInterface
+    public function allConditionsApply($firstCondition, ...$additionalConditions): PathsBasedInterface
     {
         return new AllTrue($firstCondition, ...$additionalConditions);
     }
@@ -72,7 +74,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
      *
      * @return ClauseFunctionInterface<bool>
      */
-    public function anyConditionApplies(PathsBasedInterface $firstCondition, PathsBasedInterface ...$additionalConditions): PathsBasedInterface
+    public function anyConditionApplies($firstCondition, ...$additionalConditions): PathsBasedInterface
     {
         return new AnyTrue($firstCondition, ...$additionalConditions);
     }
@@ -290,7 +292,7 @@ class DqlConditionFactory implements ConditionFactoryInterface
      *
      * Because a condition needs all information in a single row, we need to create a separate
      * join for each required value. To clarify this, consider the following tables, continuing
-     * the example in {@link ConditionFactoryInterface::allValuesPresentInMemberListProperties()}:
+     * the example in {@link PathsBasedConditionFactoryInterface::allValuesPresentInMemberListProperties()}:
      *
      * ```
      * author
