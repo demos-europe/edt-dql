@@ -6,7 +6,7 @@
     "require": {
         "doctrine/orm": "^2.5",
         "php": ">=7.4,<8",
-        "demos-europe/edt-queries": "^0.14"
+        "demos-europe/edt-queries": "^0.13.2"
     },
     "authors": [
         {
@@ -28,9 +28,9 @@
         "doctrine/cache": "^1.11"
     },
     "conflict": {
-        "demos-europe/edt-extra": "<0.13.1",
-        "demos-europe/edt-access-definitions": "<0.13.1",
-        "demos-europe/edt-paths": "<0.13.1",
-        "demos-europe/edt-jsonapi": "<0.13.1"
+        "demos-europe/edt-extra": "<0.13.2",
+        "demos-europe/edt-access-definitions": "<0.13.2",
+        "demos-europe/edt-paths": "<0.13.2",
+        "demos-europe/edt-jsonapi": "<0.13.2"
     }
 }
