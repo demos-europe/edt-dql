@@ -38,12 +38,19 @@ This library can generate a similar query builder from the following code:
 
 ```php
 use \Tests\data\DqlModel\Book;
-use EDT\DqlQuerying\Utilities\QueryGenerator;
 use EDT\DqlQuerying\ConditionFactories\DqlConditionFactory;
-$queryGenerator = new QueryGenerator($this->getEntityManager());
+use \EDT\DqlQuerying\Utilities\QueryBuilderPreparer;
+/** @var \Doctrine\ORM\EntityManager $entityManager */
+$entityManager = $this->getEntityManager();
 $conditionFactory = new DqlConditionFactory();
-$condition = $conditionFactory->propertyHasValue('USA', 'authors', 'birth', 'country');
-$queryBuilder = $queryGenerator->generateQueryBuilder(Book::class, [$condition]);
+$metadataFactory = $entityManager->getMetadataFactory();
+
+$builderPreparer = new QueryBuilderPreparer(Book::class, $metadataFactory, new JoinFinder($metadataFactory));
+$builderPreparer->setWhereExpressions([
+    $conditionFactory->propertyHasValue('USA', 'authors', 'birth', 'country'),
+]);
+
+$builderPreparer->fillQueryBuilder($entityManager->createQueryBuilder());
 ```
 
 The main advantage of the second version does not lie in line count or readability but in the removal of the need to manually specify the query in detail.
@@ -75,17 +82,21 @@ Defining the sorting can be done similarly as defining conditions. In the follow
 ```php
 use EDT\DqlQuerying\ConditionFactories\DqlConditionFactory;
 use EDT\DqlQuerying\SortMethodFactories\SortMethodFactory;
-use EDT\DqlQuerying\Utilities\QueryGenerator;
 use \Tests\data\DqlModel\Book;
+use EDT\DqlQuerying\Utilities\QueryBuilderPreparer;
+/** @var \Doctrine\ORM\EntityManager $entityManager */
+$entityManager = $this->getEntityManager();
 $conditionFactory = new DqlConditionFactory();
 $sortingFactory = new SortMethodFactory();
-$queryGenerator = new QueryGenerator($this->getEntityManager());
-$condition = $conditionFactory->true();
-$sortMethods = [
+$metadataFactory = $entityManager->getMetadataFactory();
+
+$builderPreparer = new QueryBuilderPreparer(Book::class, $metadataFactory, new JoinFinder($metadataFactory));
+$builderPreparer->setSelectExpressions([
     $sortingFactory->propertyAscending('authors', 'name'),
     $sortingFactory->propertyDescending('authors', 'birthdate'),
-];
-return $queryGenerator->generateQueryBuilder(Book::class, [$condition], $sortMethods);
+]);
+
+$builderPreparer->fillQueryBuilder($entityManager->createQueryBuilder());
 ```
 
 If the provided sort implementations do not suffice you can [write you own sort implementation](writing_dql_clauses.md#OrderByInterface). 

@@ -16,16 +16,21 @@ Take as an example the following query building:
 
 ```php
 use EDT\DqlQuerying\ConditionFactories\DqlConditionFactory;
-use EDT\DqlQuerying\Utilities\QueryGenerator;
 use \Tests\data\DqlModel\Book;
+use EDT\DqlQuerying\Utilities\QueryBuilderPreparer;
+/** @var \Doctrine\ORM\EntityManager $entityManager */
+$entityManager = $this->getEntityManager();
 $authorName = 'Charles Dickens';
-$queryGenerator = new QueryGenerator($this->getEntityManager());
 $conditionFactory = new DqlConditionFactory();
-$condition = $conditionFactory->allConditionsApply(
+$metadataFactory = $entityManager->getMetadataFactory();
+
+$builderPreparer = new QueryBuilderPreparer(Book::class, $metadataFactory, new JoinFinder($metadataFactory));
+$builderPreparer->setWhereExpressions([
     $conditionFactory->propertyHasValue($authorName, 'authors', 'name'),
     $conditionFactory->propertyHasValue($authorName, 'editors', 'name')
-);
-$queryBuilder = $queryGenerator->generateQueryBuilder(Book::class, [$condition]);
+]);
+
+$builderPreparer->fillQueryBuilder($entityManager->createQueryBuilder());
 ```
 
 In this query we look up books that were authored and edited by the same person (or two people with the same name).

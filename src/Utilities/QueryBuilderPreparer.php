@@ -43,7 +43,9 @@ class QueryBuilderPreparer
     private $joinClauses = [];
 
     /**
-     * @var array<string,class-string> mapping from the alias to the entity type
+     * Will be filled while {@link QueryBuilderPreparer::processClause() processing the clauses}.
+     *
+     * @var array<non-empty-string, class-string> mapping from the alias to the entity type
      */
     private $fromClauses = [];
 
@@ -72,7 +74,7 @@ class QueryBuilderPreparer
     private $conditions = [];
 
     /**
-     * @var OrderByInterface[]
+     * @var list<OrderByInterface>
      */
     private $sortMethods = [];
 
@@ -96,9 +98,12 @@ class QueryBuilderPreparer
      *
      * @param class-string $mainEntityClass the entity class to fetch instances of
      */
-    public function __construct(string $mainEntityClass, ClassMetadataFactory $metadataFactory)
-    {
-        $this->joinFinder = new JoinFinder($metadataFactory);
+    public function __construct(
+        string $mainEntityClass,
+        ClassMetadataFactory $metadataFactory,
+        JoinFinder $joinFinder
+    ) {
+        $this->joinFinder = $joinFinder;
         $this->metadataFactory = $metadataFactory;
         $this->mainClassMetadata = $metadataFactory->getMetadataFor($mainEntityClass);
     }
@@ -131,8 +136,10 @@ class QueryBuilderPreparer
     /**
      * Overwrites the currently set order-by definitions.
      * If called with no parameters then previously set order-by definitions will be removed.
+     *
+     * @param list<OrderByInterface> $sortMethods
      */
-    public function setOrderByExpressions(OrderByInterface ...$sortMethods): void
+    public function setOrderByExpressions(array $sortMethods): void
     {
         $this->sortMethods = $sortMethods;
     }
@@ -365,10 +372,12 @@ class QueryBuilderPreparer
     {
         $this->joinClauses = [];
         $this->parameters = [];
+        $this->fromClauses = [];
     }
 
     /**
-     * @param class-string $context
+     * @param class-string     $context
+     * @param non-empty-string $tableAlias
      *
      * @throws MappingException
      */

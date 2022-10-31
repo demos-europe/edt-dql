@@ -8,7 +8,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\QueryBuilder;
 use EDT\DqlQuerying\Contracts\ClauseInterface;
 use EDT\DqlQuerying\Contracts\MappingException;
-use EDT\DqlQuerying\Utilities\QueryGenerator;
+use EDT\DqlQuerying\Utilities\QueryBuilderPreparer;
 use EDT\DqlQuerying\Contracts\OrderByInterface;
 use EDT\Querying\Pagination\OffsetPagination;
 use EDT\Querying\Contracts\ObjectProviderInterface;
@@ -23,21 +23,19 @@ use EDT\Querying\EntityProviders\OffsetPaginatingEntityProviderInterface;
 class DoctrineOrmEntityProvider implements ObjectProviderInterface, OffsetPaginatingEntityProviderInterface
 {
     /**
-     * @var QueryGenerator
+     * @var QueryBuilderPreparer
      */
-    private $queryGenerator;
-    /**
-     * @var class-string<TEntity>
-     */
-    private $className;
+    private $builderPreparer;
 
     /**
-     * @param class-string<TEntity> $className
+     * @var EntityManager
      */
-    public function __construct(string $className, EntityManager $entityManager)
+    private $entityManager;
+
+    public function __construct(EntityManager $entityManager, QueryBuilderPreparer $builderPreparer)
     {
-        $this->className = $className;
-        $this->queryGenerator = new QueryGenerator($entityManager);
+        $this->builderPreparer = $builderPreparer;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -77,12 +75,33 @@ class DoctrineOrmEntityProvider implements ObjectProviderInterface, OffsetPagina
     /**
      * @param list<ClauseInterface>  $conditions
      * @param list<OrderByInterface> $sortMethods
+     * @param int<0, max>            $offset
+     * @param int<0, max>|null       $limit
      *
      * @throws MappingException
      * @throws PaginationException
      */
-    public function generateQueryBuilder(array $conditions, array $sortMethods = [], int $offset = 0, int $limit = null): QueryBuilder
-    {
-        return $this->queryGenerator->generateQueryBuilder($this->className, $conditions, $sortMethods, $offset, $limit);
+    public function generateQueryBuilder(
+        array $conditions,
+        array $sortMethods = [],
+        int $offset = 0,
+        int $limit = null
+    ): QueryBuilder {
+        $queryBuilder = $this->entityManager->createQueryBuilder();
+        $this->builderPreparer->setWhereExpressions($conditions);
+        $this->builderPreparer->setOrderByExpressions($sortMethods);
+        $this->builderPreparer->fillQueryBuilder($queryBuilder);
+
+        // add offset if needed
+        if (0 !== $offset) {
+            $queryBuilder->setFirstResult($offset);
+        }
+
+        // add limit if needed
+        if (null !== $limit) {
+            $queryBuilder->setMaxResults($limit);
+        }
+
+        return $queryBuilder;
     }
 }

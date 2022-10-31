@@ -152,6 +152,8 @@ class JoinFinder
      *
      * The prefixing allows to distinguish multiple usages of the same table in different contextes,
      * e.g. different paths or separate `from` clauses.
+     *
+     * @return non-empty-string
      */
     public function createTableAlias(string $prefix, ClassMetadataInfo $tableInfo): string
     {
