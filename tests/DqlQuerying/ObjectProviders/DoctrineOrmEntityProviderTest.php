@@ -447,7 +447,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testUpperCase(): void
     {
-        $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, 'title');
+        $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, ['title']);
         $sameUpperCase = new AllEqual(
             new UpperCase(new Property($propertyPath)),
             new Value('FOO'),
@@ -467,7 +467,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testSum(): void
     {
-        $propertyPathInstance = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, 'name');
+        $propertyPathInstance = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, ['name']);
         $size = new Size(new Property($propertyPathInstance));
         $sum = new AllEqual(
             new Sum($size, $size),
@@ -488,7 +488,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testSumAdditionalAddends(): void
     {
-        $propertyPathInstance = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, 'name');
+        $propertyPathInstance = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, ['name']);
         $size = new Size(new Property($propertyPathInstance));
         $sum = new AllEqual(
             new Sum($size, $size, $size, $size),
@@ -509,7 +509,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testSumPowMixed(): void
     {
-        $propertyPathInstance = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, 'name');
+        $propertyPathInstance = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, ['name']);
         $size = new Size(new Property($propertyPathInstance));
         $sum = new AllEqual(
             new Product(
@@ -540,7 +540,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testCustomMemberCondition(): void
     {
-        $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::DIRECT, 'books', 'title');
+        $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::DIRECT, ['books', 'title']);
         $condition = new AllTrue(
             new AllEqual(
                 new Value('Harry Potter and the Philosopher\'s Stone'),
@@ -567,8 +567,8 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testCustomMemberConditionWithSalt(): void
     {
-        $propertyPathA = new PropertyPath(null, 'a', PropertyPathAccessInterface::DIRECT, 'books', 'title');
-        $propertyPathB = new PropertyPath(null, 'b', PropertyPathAccessInterface::DIRECT, 'books', 'title');
+        $propertyPathA = new PropertyPath(null, 'a', PropertyPathAccessInterface::DIRECT, ['books', 'title']);
+        $propertyPathB = new PropertyPath(null, 'b', PropertyPathAccessInterface::DIRECT, ['books', 'title']);
         $condition = new AllTrue(
             new AllEqual(
                 new Property($propertyPathA),
@@ -615,17 +615,17 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testAllValuesPresentInMemberListPropertiesWithSpecificSelect(): void
     {
-        $birthDayPath = new PropertyPath(null, '', PropertyPath::DIRECT, 'birth', 'day');
-        $birthMonthPath = new PropertyPath(null, '', PropertyPath::DIRECT, 'birth', 'month');
-        $birthYearPath = new PropertyPath(null, '', PropertyPath::DIRECT, 'birth', 'year');
+        $birthDayPath = new PropertyPath(null, '', PropertyPath::DIRECT, ['birth', 'day']);
+        $birthMonthPath = new PropertyPath(null, '', PropertyPath::DIRECT, ['birth', 'month']);
+        $birthYearPath = new PropertyPath(null, '', PropertyPath::DIRECT, ['birth', 'year']);
 
         $selectBirthSum = new Sum(...array_map(
             static fn (PropertyPath $propertyPath): Property => new Property($propertyPath),
             [$birthDayPath, $birthMonthPath, $birthYearPath]
         ));
-        $titlePath = new PropertyPath(null, '0', PropertyPath::DIRECT, 'books', 'title');
+        $titlePath = new PropertyPath(null, '0', PropertyPath::DIRECT, ['books', 'title']);
         $selectTitleProperty = new Property($titlePath);
-        $namePath = new PropertyPath(null, '0', PropertyPath::DIRECT, 'name');
+        $namePath = new PropertyPath(null, '0', PropertyPath::DIRECT, ['name']);
         $selectNameProperty = new Property($namePath);
 
         $condition = $this->conditionFactory->allValuesPresentInMemberListProperties([

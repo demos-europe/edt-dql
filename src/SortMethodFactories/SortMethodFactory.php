@@ -20,13 +20,15 @@ class SortMethodFactory implements SortMethodFactoryInterface
 {
     public function propertyAscending(string $property, string ...$properties): PathsBasedInterface
     {
-        $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK_RECURSIVE, $property, ...$properties);
+        array_unshift($properties, $property);
+        $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK_RECURSIVE,  array_values($properties));
         return new Ascending(new Property($propertyPath));
     }
 
     public function propertyDescending(string $property, string ...$properties): PathsBasedInterface
     {
-        $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK_RECURSIVE, $property, ...$properties);
+        array_unshift($properties, $property);
+        $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK_RECURSIVE,  array_values($properties));
         return new Descending(new Property($propertyPath));
     }
 }
