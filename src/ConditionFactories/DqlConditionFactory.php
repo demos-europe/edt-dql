@@ -342,7 +342,7 @@ class DqlConditionFactory implements PathsBasedConditionFactoryInterface, PathsB
      *
      * @throws PathException
      */
-    public function allValuesPresentInMemberListProperties(array $values, string $property, string ...$properties): PathsBasedInterface
+    public function allValuesPresentInMemberListProperties(array $values, array $properties): PathsBasedInterface
     {
         // When building the DQL joins duplications will be avoided by default. I.e. if the
         // same property path is used in multiple conditions the corresponding join is
@@ -351,13 +351,15 @@ class DqlConditionFactory implements PathsBasedConditionFactoryInterface, PathsB
         // a separate join and corresponding condition for each given value. By setting a different
         // salt for each PropertyPath they will result in separate joins to different columns, even
         // though they are all based on the same given property path.
-        $propertyPaths = PropertyPath::createIndexSaltedPaths(count($values), PropertyPathAccessInterface::DIRECT, $property, ...$properties);
+        $propertyPaths = PropertyPath::createIndexSaltedPaths(count($values), PropertyPathAccessInterface::DIRECT, $properties);
         // Each $propertyPath now corresponds to a different value in $values and accesses a
         // different column as explained above. Hence, we can create a separate condition for each
         // one, each being responsible for a single value in $values.
-        $equalityConditions = array_map(static function ($value, PropertyPathAccessInterface $propertyPath): AllEqual {
-            return new AllEqual(new Property($propertyPath), new Value($value));
-        }, $values, $propertyPaths);
+        $equalityConditions = array_map(
+            static fn ($value, PropertyPathAccessInterface $propertyPath): AllEqual => new AllEqual(new Property($propertyPath), new Value($value)),
+            $values,
+            $propertyPaths
+        );
 
         // Because we want to check if *all* values are present, we combine the created conditions
         // via a logical `AND` operator.

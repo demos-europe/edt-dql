@@ -16,29 +16,24 @@ class Person
      * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue
-     *
-     * @var int
      */
-    private $id;
+    private int $id;
 
     /**
-     * @var string
      * @ORM\Column(type="string", nullable=false)
      */
-    private $name;
-    /**
-     * @var string|null
-     */
-    private $pseudonym;
+    private string $name;
+
+    private ?string $pseudonym = null;
+
     /**
      * @ORM\OneToOne(targetEntity="Birth")
-     * @var Birth
      */
-    private $birth;
+    private Birth $birth;
 
     /**
      * @ORM\OneToMany(targetEntity="Book", mappedBy="author")
-     * @var Collection<int,Book>
+     * @var Collection<int, Book>
      */
-    private $books;
+    private Collection $books;
 }

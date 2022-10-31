@@ -28,26 +28,23 @@ use function count;
  */
 class QueryBuilderPreparer
 {
-    /**
-     * @var JoinFinder
-     */
-    private $joinFinder;
+    private JoinFinder $joinFinder;
 
     /**
      * The alias of each join must be unique in the array.
      *
      * Will be filled while {@link QueryBuilderPreparer::processClause() processing the clauses}.
      *
-     * @var array<string,Join>
+     * @var array<string, Join>
      */
-    private $joinClauses = [];
+    private array $joinClauses = [];
 
     /**
      * Will be filled while {@link QueryBuilderPreparer::processClause() processing the clauses}.
      *
      * @var array<non-empty-string, class-string> mapping from the alias to the entity type
      */
-    private $fromClauses = [];
+    private array $fromClauses = [];
 
     /**
      * Mapping from (integer) parameter key to parameter value.
@@ -58,35 +55,30 @@ class QueryBuilderPreparer
      *
      * @var list<mixed>
      */
-    private $parameters = [];
+    private array $parameters = [];
 
     /**
      * Provides all needed information to choose the correct entity type and mappings to translate
      * the group into DQL data.
-     *
-     * @var ClassMetadataInfo
      */
-    private $mainClassMetadata;
+    private ClassMetadataInfo $mainClassMetadata;
 
     /**
      * @var list<ClauseInterface>
      */
-    private $conditions = [];
+    private array $conditions = [];
 
     /**
      * @var list<OrderByInterface>
      */
-    private $sortMethods = [];
+    private array $sortMethods = [];
 
-    /**
-     * @var ClassMetadataFactory
-     */
-    private $metadataFactory;
+    private ClassMetadataFactory $metadataFactory;
 
     /**
      * @var array<string, ClauseInterface> keys are used as aliases
      */
-    private $selections = [];
+    private array $selections = [];
 
     /**
      * Transform the given group into raw DQL query data using the given entity definition.
@@ -166,9 +158,11 @@ class QueryBuilderPreparer
         if ([] === $selectExpressions) {
             $queryBuilder->select($entityAlias);
         }
-        $selectExpressions = array_map(static function ($expression, string $alias): string {
-            return "$expression AS $alias";
-        }, $selectExpressions, array_keys($selectExpressions));
+        $selectExpressions = array_map(
+            static fn ($expression, string $alias): string => "$expression AS $alias",
+            $selectExpressions,
+            array_keys($selectExpressions)
+        );
         $queryBuilder->addSelect($selectExpressions);
 
         // set `FROM`s

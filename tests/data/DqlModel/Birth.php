@@ -15,49 +15,37 @@ class Birth
      * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue
-     *
-     * @var int
      */
-    private $id;
+    private int $id;
+
+    private string $country;
+
+    private ?string $region = null;
+
+    private string $locality;
 
     /**
-     * @var string
-     */
-    private $country;
-    /**
-     * @var string|null
-     */
-    private $region;
-    /**
-     * @var string
-     */
-    private $locality;
-
-    /**
-     * @var string
      * @ORM\Column(type="string", nullable=false)
      */
-    private $street;
+    private string $street;
 
     /**
-     * @var string
      * @ORM\Column(type="string", nullable=false)
      */
-    private $streetNumber;
+    private string $streetNumber;
 
     /**
-     * @var int
      * @ORM\Column(type="integer", nullable=false)
      */
-    private $day;
+    private int $day;
+
     /**
-     * @var int
      * @ORM\Column(type="integer", nullable=false)
      */
-    private $month;
+    private int $month;
+
     /**
-     * @var int
      * @ORM\Column(type="integer", nullable=false)
      */
-    private $year;
+    private int $year;
 }

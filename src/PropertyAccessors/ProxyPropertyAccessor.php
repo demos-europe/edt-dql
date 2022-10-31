@@ -13,10 +13,7 @@ use function get_class;
 
 class ProxyPropertyAccessor extends ReflectionPropertyAccessor
 {
-    /**
-     * @var ObjectManager
-     */
-    private $objectManager;
+    private ObjectManager $objectManager;
 
     public function __construct(ObjectManager $objectManager)
     {

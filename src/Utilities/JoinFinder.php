@@ -20,10 +20,7 @@ use function get_class;
  */
 class JoinFinder
 {
-    /**
-     * @var ClassMetadataFactory
-     */
-    private $metadataFactory;
+    private ClassMetadataFactory $metadataFactory;
 
     public function __construct(ClassMetadataFactory $metadataFactory)
     {

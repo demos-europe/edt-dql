@@ -20,19 +20,11 @@ use Tests\data\DqlModel\Person;
 
 class JoinFinderTest extends TestCase
 {
-    /**
-     * @var JoinFinder
-     */
-    protected $joinFinder;
-    /**
-     * @var ClassMetadata
-     */
-    private $bookMetadata;
+    protected JoinFinder $joinFinder;
 
-    /**
-     * @var ClassMetadata
-     */
-    private $personMetadata;
+    private ClassMetadata $bookMetadata;
+
+    private ClassMetadata $personMetadata;
 
     protected function setUp(): void
     {

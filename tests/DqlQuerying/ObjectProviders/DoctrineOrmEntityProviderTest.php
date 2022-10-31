@@ -33,35 +33,23 @@ use Tests\data\DqlModel\Person;
 
 class DoctrineOrmEntityProviderTest extends TestCase
 {
-    /**
-     * @var EntityManager
-     */
-    protected $entityManager;
+    protected EntityManager $entityManager;
 
-    /**
-     * @var DqlConditionFactory
-     */
-    protected $conditionFactory;
+    protected DqlConditionFactory $conditionFactory;
 
-    /**
-     * @var SortMethodFactory
-     */
-    protected $sortingFactory;
+    protected SortMethodFactory $sortingFactory;
 
-    /**
-     * @var QueryBuilderPreparer
-     */
-    private $personBuilderPreparer;
+    private QueryBuilderPreparer $personBuilderPreparer;
 
     /**
      * @var DoctrineOrmEntityProvider<Person>
      */
-    private $personEntityProvider;
+    private DoctrineOrmEntityProvider $personEntityProvider;
 
     /**
      * @var DoctrineOrmEntityProvider<Book>
      */
-    private $bookEntityProvider;
+    private DoctrineOrmEntityProvider $bookEntityProvider;
 
     protected function setUp(): void
     {
@@ -610,7 +598,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
         $condition = $this->conditionFactory->allValuesPresentInMemberListProperties([
             'Harry Potter and the Philosopher\'s Stone',
             'Harry Potter and the Deathly Hallows'
-        ], 'books', 'title');
+        ], ['books', 'title']);
         $queryBuilder = $this->personEntityProvider->generateQueryBuilder([$condition]);
         self::assertSame(
             /** @lang DQL */
@@ -631,9 +619,10 @@ class DoctrineOrmEntityProviderTest extends TestCase
         $birthMonthPath = new PropertyPath(null, '', PropertyPath::DIRECT, 'birth', 'month');
         $birthYearPath = new PropertyPath(null, '', PropertyPath::DIRECT, 'birth', 'year');
 
-        $selectBirthSum = new Sum(...array_map(static function (PropertyPath $propertyPath): Property {
-            return new Property($propertyPath);
-        }, [$birthDayPath, $birthMonthPath, $birthYearPath]));
+        $selectBirthSum = new Sum(...array_map(
+            static fn (PropertyPath $propertyPath): Property => new Property($propertyPath),
+            [$birthDayPath, $birthMonthPath, $birthYearPath]
+        ));
         $titlePath = new PropertyPath(null, '0', PropertyPath::DIRECT, 'books', 'title');
         $selectTitleProperty = new Property($titlePath);
         $namePath = new PropertyPath(null, '0', PropertyPath::DIRECT, 'name');
@@ -642,7 +631,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
         $condition = $this->conditionFactory->allValuesPresentInMemberListProperties([
             'Harry Potter and the Philosopher\'s Stone',
             'Harry Potter and the Deathly Hallows'
-        ], 'books', 'title');
+        ], ['books', 'title']);
 
         $this->personBuilderPreparer->setSelectExpressions([
             'name' => $selectNameProperty,

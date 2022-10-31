@@ -31,9 +31,7 @@ class AllEqual extends AbstractClauseFunction
         $dqls = $this->getDqls($valueReferences, $propertyAliases);
 
         $firstDql = array_shift($dqls);
-        $eqs = array_map(function ($dql) use ($firstDql): Expr\Comparison {
-            return $this->expr->eq($firstDql, $dql);
-        }, $dqls);
+        $eqs = array_map(fn ($dql): Expr\Comparison => $this->expr->eq($firstDql, $dql), $dqls);
 
         return new Andx($eqs);
     }

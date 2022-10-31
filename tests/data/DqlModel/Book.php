@@ -15,26 +15,22 @@ class Book
      * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue
-     *
-     * @var int
      */
-    private $id;
+    private int $id;
 
     /**
-     * @var string
      * @ORM\Column(type="string")
      */
-    protected $title;
+    protected string $title;
 
     /**
-     * @var Person
      * @ORM\ManyToOne(targetEntity="Person", inversedBy="books")
      */
-    protected $author;
+    protected Person $author;
 
     /**
      * @var string[]
      * @ORM\Column(type="simple_array")
      */
-    protected $tags;
+    protected array $tags;
 }
