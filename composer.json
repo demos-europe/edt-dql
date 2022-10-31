@@ -28,9 +28,9 @@
         "doctrine/cache": "^1.11"
     },
     "conflict": {
-        "demos-europe/edt-extra": "<0.12.23",
-        "demos-europe/edt-access-definitions": "<0.12.23",
-        "demos-europe/edt-paths": "<0.12.23",
-        "demos-europe/edt-jsonapi": "<0.12.23"
+        "demos-europe/edt-extra": "<0.13.0",
+        "demos-europe/edt-access-definitions": "<0.13.0",
+        "demos-europe/edt-paths": "<0.13.0",
+        "demos-europe/edt-jsonapi": "<0.13.0"
     }
 }
