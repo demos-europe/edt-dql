@@ -6,7 +6,7 @@ namespace EDT\DqlQuerying\SortMethods;
 
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 use EDT\DqlQuerying\Contracts\OrderBySortMethodInterface;
-use EDT\Querying\Utilities\Iterables;
+use Webmozart\Assert\Assert;
 
 class Ascending extends \EDT\Querying\SortMethods\Ascending implements OrderBySortMethodInterface
 {
@@ -20,8 +20,9 @@ class Ascending extends \EDT\Querying\SortMethods\Ascending implements OrderBySo
 
     public function asDql(array $valueReferences, array $propertyAliases)
     {
-        Iterables::assertCount(0, $valueReferences);
-        return Iterables::getOnlyValue($propertyAliases);
+        Assert::count($valueReferences, 0);
+        Assert::count($propertyAliases, 1);
+        return array_pop($propertyAliases);
     }
 
     public function getDirection(): string

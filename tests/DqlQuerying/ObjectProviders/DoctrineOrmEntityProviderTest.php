@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\Tools\Setup;
 use EDT\DqlQuerying\ConditionFactories\DqlConditionFactory;
+use EDT\DqlQuerying\Contracts\MappingException;
 use EDT\DqlQuerying\Functions\AllEqual;
 use EDT\DqlQuerying\Functions\AllTrue;
 use EDT\DqlQuerying\Functions\Product;
@@ -190,7 +191,8 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testEqualsWithAscendingToManySorting(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(MappingException::class);
+        $this->expectExceptionMessage("Join processing failed for the path 'books.title' with the salt ''.");
 
         $propertyHasValue = $this->conditionFactory->propertyHasValue('Example Street', 'author', 'birth', 'street');
         $ascending = $this->sortingFactory->propertyAscending('books', 'title');

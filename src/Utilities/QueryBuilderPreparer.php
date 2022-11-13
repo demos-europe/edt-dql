@@ -35,7 +35,7 @@ class QueryBuilderPreparer
      *
      * Will be filled while {@link QueryBuilderPreparer::processClause() processing the clauses}.
      *
-     * @var array<string, Join>
+     * @var array<non-empty-string, Join> mapping from the join alias to the {@link Join} instance
      */
     private array $joinClauses = [];
 
@@ -210,7 +210,14 @@ class QueryBuilderPreparer
         $valueIndices = array_map([$this, 'addToParameters'], $clause->getClauseValues());
         $columnNames = array_map(function (PathInfo $pathInfo): string {
             $path = $pathInfo->getPath();
-            return $this->processPath($pathInfo->isToManyAllowed(), $path->getSalt(), $path->getAccessDepth(), $path->getContext(), ...iterator_to_array($path));
+
+            return $this->processPath(
+                $pathInfo->isToManyAllowed(),
+                $path->getSalt(),
+                $path->getAccessDepth(),
+                $path->getContext(),
+                $path->getAsNames()
+            );
         }, $clause->getPropertyPaths());
 
         return $clause->asDql($valueIndices, $columnNames);
@@ -231,6 +238,7 @@ class QueryBuilderPreparer
      *                         will be returned (with appended property name).
      * @param class-string|null $context non-`null` if a different context (i.e. a separate `from`
      *                                   clause should be used for the current path
+     * @param non-empty-list<non-empty-string> $properties
      *
      * @return string The alias of the entity at the end of the path with or without appended property name.
      *
@@ -238,9 +246,8 @@ class QueryBuilderPreparer
      * @throws \Doctrine\Persistence\Mapping\MappingException
      * @throws ReflectionException
      */
-    protected function processPath(bool $isToManyAllowed, string $salt, int $accessDepth, ?string $context, string $property, string ...$properties): string
+    protected function processPath(bool $isToManyAllowed, string $salt, int $accessDepth, ?string $context, array $properties): string
     {
-        array_unshift($properties, $property);
         $originalPathLength = count($properties);
 
         /**
@@ -286,9 +293,9 @@ class QueryBuilderPreparer
 
         if (0 !== $joinCount) {
             // Add the joins found for this condition to all joins found so far.
-            // Will override duplicated keys, this is ok, as we expect the key
-            // to be the join alias and the join alias to be unique except
-            // it actually corresponds to the exactly same join clause.
+            // Will override duplicated keys, this is ok, as we expect the join alias to be unique
+            // except it actually corresponds to the exactly same join clause. This is not just
+            // an assumption but controlled by the provided paths and their usage of salts.
             $this->joinClauses = array_merge($this->joinClauses, $neededJoins);
 
             // As there were joins needed to access the property the accessed entity is now the

@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping\MappingException as OrmMappingException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
 use EDT\DqlQuerying\Contracts\MappingException;
+use Exception;
 use InvalidArgumentException;
 use ReflectionException;
 use function array_key_exists;
@@ -46,9 +47,9 @@ class JoinFinder
      * different paths:
      * * `t_58fb870d_Person` in case of a join to the `authors` of a `Book` entity
      *
-     * @param string[] $path
+     * @param list<non-empty-string> $path
      *
-     * @return array<string, Join> The needed joins. The key will be the alias of
+     * @return array<non-empty-string, Join> The needed joins. The key will be the alias of
      *                       {@link Join::getAlias()} to ensure uniqueness of the joins returned.
      *                       The count indicates if the last property was a relationship or an attribute.
      *                       In case of a non-relationship the number of returned joins is exactly one less
@@ -62,29 +63,28 @@ class JoinFinder
             return [];
         }
 
-        $joins = $this->findJoinsRecursive($toManyAllowed, $salt, $classMetadata, $tableAlias, ...$path);
-
-        $keyIndexedJoins = [];
-        foreach ($joins as $join) {
-            $alias = $join->getAlias();
-            if (null === $alias) {
-                throw new InvalidArgumentException('Alias must not be null');
-            }
-            if (array_key_exists($alias, $keyIndexedJoins)) {
-                throw MappingException::duplicatedAlias($alias, $path, $salt);
-            }
-            $keyIndexedJoins[$alias] = $join;
+        try {
+            $joins = $this->findJoinsRecursive($toManyAllowed, $salt, $classMetadata, $tableAlias, ...$path);
+        } catch (Exception $exception) {
+            throw MappingException::joinProcessingFailed($path, $salt, $exception);
         }
 
-        return $keyIndexedJoins;
+        $joinInstances = [];
+        foreach ($joins as $alias => $join) {
+            $joinInstances[$alias] = new Join(Join::LEFT_JOIN, $join, $alias);
+        }
+
+        return $joinInstances;
     }
 
     /**
      * @param string $pathSalt will be used when generating the tables aliases to distinguish the
      *                         segments in this path from segments in other paths that use the same
      *                         table name
+     * @param non-empty-string $pathPart
+     * @param non-empty-string ...$morePathParts
      *
-     * @return list<Join>
+     * @return array<non-empty-string, non-empty-string> mapping from the join alias to
      * @throws MappingException
      * @throws OrmMappingException
      */
@@ -108,14 +108,10 @@ class JoinFinder
             $nextTablePrefix = hash('crc32b', "$pathSalt$tableAlias.$pathPart");
             $nextTableAlias = $this->createTableAlias($nextTablePrefix, $nextClassMetadata);
 
-            $neededJoin = new Join(
-                Join::LEFT_JOIN,
-                "$tableAlias.$pathPart",
-                $nextTableAlias
-            );
+            $neededJoins = [$nextTableAlias => "$tableAlias.$pathPart"];
 
             if ([] === $morePathParts) {
-                return [$neededJoin];
+                return $neededJoins;
             }
 
             $additionallyNeededJoins = $this->findJoinsRecursive(
@@ -126,9 +122,11 @@ class JoinFinder
                 ...$morePathParts
             );
 
-            array_unshift($additionallyNeededJoins, $neededJoin);
+            if (array_key_exists($nextTableAlias, $additionallyNeededJoins)) {
+                throw MappingException::duplicatedAlias($nextTableAlias, $pathPart);
+            }
 
-            return $additionallyNeededJoins;
+            return array_merge($neededJoins, $additionallyNeededJoins);
         }
 
         if (!$this->isAttribute($classMetadata, $pathPart)) {

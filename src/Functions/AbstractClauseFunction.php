@@ -14,6 +14,7 @@ use EDT\DqlQuerying\Contracts\ClauseInterface;
 use EDT\Querying\Contracts\FunctionInterface;
 use EDT\Querying\Contracts\PathsBasedInterface;
 use EDT\Querying\Utilities\Iterables;
+use Webmozart\Assert\Assert;
 use function count;
 
 /**
@@ -120,7 +121,7 @@ abstract class AbstractClauseFunction implements ClauseFunctionInterface
      */
     protected function getOnlyClause(): ClauseInterface
     {
-        Iterables::assertCount(1, $this->clauses);
+        Assert::count($this->clauses, 1);
         return $this->clauses[0];
     }
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace EDT\DqlQuerying\Functions;
 
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
-use EDT\Querying\Utilities\Iterables;
+use Webmozart\Assert\Assert;
 
 /**
  * @template TOutput
@@ -21,7 +21,8 @@ class Value extends \EDT\Querying\Functions\Value implements ClauseFunctionInter
 
     public function asDql(array $valueReferences, array $propertyAliases): string
     {
-        Iterables::assertCount(0, $propertyAliases);
-        return Iterables::getOnlyValue($valueReferences);
+        Assert::count($propertyAliases, 0);
+        Assert::count($valueReferences, 1);
+        return array_pop($valueReferences);
     }
 }

@@ -33,13 +33,12 @@ class MappingException extends Exception
     }
 
     /**
-     * @param list<string> $path
+     * @param non-empty-string $alias
+     * @param non-empty-string $pathSegment
      */
-    public static function duplicatedAlias(?string $alias, array $path, string $salt): self
+    public static function duplicatedAlias(string $alias, string $pathSegment): self
     {
-        $pathString = implode('.', $path);
-
-        return new self("The path '$pathString' with the salt '$salt' resulted in more than one join with the same alias '$alias'.");
+        return new self("Found more than one join with the same alias '$alias' in one path for the path segment '$pathSegment'.");
     }
 
     /**
@@ -48,5 +47,16 @@ class MappingException extends Exception
     public static function disallowedToMany(string $name, string $property): self
     {
         return new self("The processed path accesses the to-many relationship '$property' in class '$name', while being used in a context where to-many relationships are not allowed.");
+    }
+
+    /**
+     * @param non-empty-list<non-empty-string> $path
+     * @param string $salt
+     */
+    public static function joinProcessingFailed(array $path, string $salt, Exception $exception): self
+    {
+        $pathString = implode('.', $path);
+
+        return new self("Join processing failed for the path '$pathString' with the salt '$salt'.", 0, $exception);
     }
 }
