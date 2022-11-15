@@ -18,13 +18,13 @@ use EDT\Querying\PropertyPaths\PropertyPath;
  */
 class SortMethodFactory implements SortMethodFactoryInterface
 {
-    public function propertyAscending(array $properties): PathsBasedInterface
+    public function propertyAscending($properties): PathsBasedInterface
     {
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK_RECURSIVE, $properties);
         return new Ascending(new Property($propertyPath));
     }
 
-    public function propertyDescending(array $properties): PathsBasedInterface
+    public function propertyDescending($properties): PathsBasedInterface
     {
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK_RECURSIVE, $properties);
         return new Descending(new Property($propertyPath));
