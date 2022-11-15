@@ -120,8 +120,8 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testAnyConditionApplies(): void
     {
-        $emptyTitleCondition = $this->conditionFactory->propertyHasValue('', 'title');
-        $nullTitleCondition = $this->conditionFactory->propertyIsNull('title');
+        $emptyTitleCondition = $this->conditionFactory->propertyHasValue('', ['title']);
+        $nullTitleCondition = $this->conditionFactory->propertyIsNull(['title']);
         $allConditionsApply = $this->conditionFactory->anyConditionApplies($emptyTitleCondition, $nullTitleCondition);
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder([$allConditionsApply]);
         self::assertSame(
@@ -138,8 +138,8 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testAllConditionsApply(): void
     {
-        $bookA = $this->conditionFactory->propertyHasValue('Harry Potter and the Philosopher\'s Stone', 'books', 'title');
-        $bookB = $this->conditionFactory->propertyHasValue('Harry Potter and the Deathly Hallows', 'books', 'title');
+        $bookA = $this->conditionFactory->propertyHasValue('Harry Potter and the Philosopher\'s Stone', ['books', 'title']);
+        $bookB = $this->conditionFactory->propertyHasValue('Harry Potter and the Deathly Hallows', ['books', 'title']);
         $allConditionsApply = $this->conditionFactory->allConditionsApply($bookA, $bookB);
         $queryBuilder = $this->personEntityProvider->generateQueryBuilder([$allConditionsApply]);
         self::assertSame(
@@ -157,7 +157,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testEqualsWithoutSorting(): void
     {
-        $propertyHasValue = $this->conditionFactory->propertyHasValue('Example Street', 'author', 'birth', 'street');
+        $propertyHasValue = $this->conditionFactory->propertyHasValue('Example Street', ['author', 'birth', 'street']);
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder([$propertyHasValue]);
         self::assertSame(
             /** @lang DQL */
@@ -173,9 +173,9 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testEqualsWithAscendingFirstSorting(): void
     {
-        $propertyHasValue = $this->conditionFactory->propertyHasValue('Example Street', 'author', 'birth', 'street');
-        $ascending = $this->sortingFactory->propertyAscending('author', 'birth', 'street');
-        $descending = $this->sortingFactory->propertyDescending('title');
+        $propertyHasValue = $this->conditionFactory->propertyHasValue('Example Street', ['author', 'birth', 'street']);
+        $ascending = $this->sortingFactory->propertyAscending(['author', 'birth', 'street']);
+        $descending = $this->sortingFactory->propertyDescending(['title']);
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder([$propertyHasValue], [$ascending, $descending]);
         self::assertSame(
             /** @lang DQL */
@@ -194,16 +194,16 @@ class DoctrineOrmEntityProviderTest extends TestCase
         $this->expectException(MappingException::class);
         $this->expectExceptionMessage("Join processing failed for the path 'books.title' with the salt ''.");
 
-        $propertyHasValue = $this->conditionFactory->propertyHasValue('Example Street', 'author', 'birth', 'street');
-        $ascending = $this->sortingFactory->propertyAscending('books', 'title');
+        $propertyHasValue = $this->conditionFactory->propertyHasValue('Example Street', ['author', 'birth', 'street']);
+        $ascending = $this->sortingFactory->propertyAscending(['books', 'title']);
         $this->bookEntityProvider->generateQueryBuilder([$propertyHasValue], [$ascending]);
     }
 
     public function testEqualsWithDescendingFirstSorting(): void
     {
-        $propertyHasValue = $this->conditionFactory->propertyHasValue('Example Street', 'author', 'birth', 'street');
-        $descending = $this->sortingFactory->propertyDescending('author', 'birth', 'street');
-        $ascending = $this->sortingFactory->propertyAscending('title');
+        $propertyHasValue = $this->conditionFactory->propertyHasValue('Example Street', ['author', 'birth', 'street']);
+        $descending = $this->sortingFactory->propertyDescending(['author', 'birth', 'street']);
+        $ascending = $this->sortingFactory->propertyAscending(['title']);
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder([$propertyHasValue], [$descending, $ascending]);
         self::assertSame(
             /** @lang DQL */
@@ -219,9 +219,9 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testEqualsWithAscendingFirstSortingAndPagination(): void
     {
-        $propertyHasValue = $this->conditionFactory->propertyHasValue('Example Street', 'author', 'birth', 'street');
-        $ascending = $this->sortingFactory->propertyAscending('author', 'birth', 'street');
-        $descending = $this->sortingFactory->propertyDescending('title');
+        $propertyHasValue = $this->conditionFactory->propertyHasValue('Example Street', ['author', 'birth', 'street']);
+        $ascending = $this->sortingFactory->propertyAscending(['author', 'birth', 'street']);
+        $descending = $this->sortingFactory->propertyDescending(['title']);
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder(
             [$propertyHasValue],
             [$ascending, $descending],
@@ -244,7 +244,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testNullRelationship(): void
     {
-        $propertyIsNull = $this->conditionFactory->propertyIsNull('author', 'birth');
+        $propertyIsNull = $this->conditionFactory->propertyIsNull(['author', 'birth']);
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder([$propertyIsNull]);
         self::assertSame(
             /** @lang DQL */
@@ -256,7 +256,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testNullNonRelationship(): void
     {
-        $propertyIsNull = $this->conditionFactory->propertyIsNull('author', 'birth', 'street');
+        $propertyIsNull = $this->conditionFactory->propertyIsNull(['author', 'birth', 'street']);
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder([$propertyIsNull]);
         self::assertSame(
             /** @lang DQL */
@@ -268,7 +268,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testEmptyRelationship(): void
     {
-        $propertyHasSize = $this->conditionFactory->propertyHasSize(0, 'author');
+        $propertyHasSize = $this->conditionFactory->propertyHasSize(0, ['author']);
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder([$propertyHasSize]);
         self::assertSame(
             /** @lang DQL */
@@ -284,7 +284,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testNonEmptyRelationship(): void
     {
-        $propertyHasNotSize = $this->conditionFactory->propertyHasNotSize(0, 'books');
+        $propertyHasNotSize = $this->conditionFactory->propertyHasNotSize(0, ['books']);
         $queryBuilder = $this->personEntityProvider->generateQueryBuilder([$propertyHasNotSize]);
         self::assertSame(
             /** @lang DQL */
@@ -300,7 +300,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testNonEmptyRelationshipNested(): void
     {
-        $propertyHasNotSize = $this->conditionFactory->propertyHasNotSize(0, 'author', 'books');
+        $propertyHasNotSize = $this->conditionFactory->propertyHasNotSize(0, ['author', 'books']);
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder([$propertyHasNotSize]);
         self::assertSame(
             /** @lang DQL */
@@ -316,7 +316,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testBetweenValues(): void
     {
-        $propertyBetween = $this->conditionFactory->propertyBetweenValuesInclusive(-1, 5, 'author', 'birth', 'streetNumber');
+        $propertyBetween = $this->conditionFactory->propertyBetweenValuesInclusive(-1, 5, ['author', 'birth', 'streetNumber']);
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder([$propertyBetween]);
         self::assertSame(
             /** @lang DQL */
@@ -333,7 +333,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testContainsValueCaseInsensitive(): void
     {
-        $containsValue = $this->conditionFactory->propertyHasStringContainingCaseInsensitiveValue('Ave', 'author', 'birth', 'street');
+        $containsValue = $this->conditionFactory->propertyHasStringContainingCaseInsensitiveValue('Ave', ['author', 'birth', 'street']);
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder([$containsValue]);
         self::assertSame(
             /** @lang DQL */
@@ -349,7 +349,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testOneOfValues(): void
     {
-        $containsValue = $this->conditionFactory->propertyHasAnyOfValues([1, 2, 3], 'author', 'birth', 'streetNumber');
+        $containsValue = $this->conditionFactory->propertyHasAnyOfValues([1, 2, 3], ['author', 'birth', 'streetNumber']);
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder([$containsValue]);
         self::assertSame(
             /** @lang DQL */
@@ -365,7 +365,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testOneOfValuesWithEmptyArray(): void
     {
-        $containsValue = $this->conditionFactory->propertyHasAnyOfValues([], 'author', 'birth', 'streetNumber');
+        $containsValue = $this->conditionFactory->propertyHasAnyOfValues([], ['author', 'birth', 'streetNumber']);
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder([$containsValue]);
         self::assertSame(
             /** @lang DQL */
@@ -377,7 +377,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testNotOneOfValuesWithEmptyArray(): void
     {
-        $containsValue = $this->conditionFactory->propertyHasNotAnyOfValues([], 'author', 'birth', 'streetNumber');
+        $containsValue = $this->conditionFactory->propertyHasNotAnyOfValues([], ['author', 'birth', 'streetNumber']);
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder([$containsValue]);
         self::assertSame(
             /** @lang DQL */
@@ -389,7 +389,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testPropertyHasStringAsMember(): void
     {
-        $novelBook = $this->conditionFactory->propertyHasStringAsMember('Novel', 'tags');
+        $novelBook = $this->conditionFactory->propertyHasStringAsMember('Novel', ['tags']);
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder([$novelBook]);
         self::assertSame(
             /** @lang DQL */
@@ -405,7 +405,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
 
     public function testPropertyHasNotStringAsMember(): void
     {
-        $noNovelBook = $this->conditionFactory->propertyHasNotStringAsMember('Novel', 'tags');
+        $noNovelBook = $this->conditionFactory->propertyHasNotStringAsMember('Novel', ['tags']);
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder([$noNovelBook]);
         self::assertSame(
             /** @lang DQL */
