@@ -64,8 +64,6 @@ class DoctrineOrmEntityProviderTest extends TestCase
         );
         $paths = [__DIR__.'/tests/data/Model'];
         $driver = new AnnotationDriver(new AnnotationReader(), $paths);
-        // registering noop annotation autoloader - allow all annotations by default
-        AnnotationRegistry::registerLoader('class_exists');
         $config->setMetadataDriverImpl($driver);
         $conn = [
             'driver' => 'pdo_sqlite',
@@ -452,7 +450,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
         $propertyPath = new PropertyPath(null, '', PropertyPathAccessInterface::UNPACK, ['title']);
         $sameUpperCase = new AllEqual(
             new UpperCase(new Property($propertyPath)),
-            new Value('FOO'),
+            new Value('FOO')
         );
         $queryBuilder = $this->bookEntityProvider->generateQueryBuilder([$sameUpperCase]);
         self::assertSame(
@@ -550,7 +548,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
             ),
             new AllEqual(
                 new Value('Harry Potter and the Deathly Hallows'),
-                new Property($propertyPath),
+                new Property($propertyPath)
             )
         );
         $queryBuilder = $this->personEntityProvider->generateQueryBuilder([$condition]);

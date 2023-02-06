@@ -20,18 +20,14 @@ use Webmozart\Assert\Assert;
 class Constant extends \EDT\Querying\Functions\Value implements ClauseFunctionInterface
 {
     /**
-     * @var V
-     */
-    private $dqlValue;
-
-    /**
      * @param TOutput $phpValue
      * @param V $dqlValue
      */
-    public function __construct($phpValue, $dqlValue)
-    {
+    public function __construct(
+        mixed $phpValue,
+        private readonly Composite|Math|Func|Comparison|string $dqlValue
+    ) {
         parent::__construct($phpValue);
-        $this->dqlValue = $dqlValue;
     }
 
     public function getClauseValues(): array
@@ -42,7 +38,7 @@ class Constant extends \EDT\Querying\Functions\Value implements ClauseFunctionIn
     /**
      * @return V
      */
-    public function asDql(array $valueReferences, array $propertyAliases)
+    public function asDql(array $valueReferences, array $propertyAliases): Composite|Math|Func|Comparison|string
     {
         Assert::count($valueReferences, 0);
         Assert::count($propertyAliases, 0);

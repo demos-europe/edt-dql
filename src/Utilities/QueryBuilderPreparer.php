@@ -28,8 +28,6 @@ use function count;
  */
 class QueryBuilderPreparer
 {
-    private JoinFinder $joinFinder;
-
     /**
      * The alias of each join must be unique in the array.
      *
@@ -73,8 +71,6 @@ class QueryBuilderPreparer
      */
     private array $sortMethods = [];
 
-    private ClassMetadataFactory $metadataFactory;
-
     /**
      * @var array<string, ClauseInterface> keys are used as aliases
      */
@@ -92,11 +88,9 @@ class QueryBuilderPreparer
      */
     public function __construct(
         string $mainEntityClass,
-        ClassMetadataFactory $metadataFactory,
-        JoinFinder $joinFinder
+        private readonly ClassMetadataFactory $metadataFactory,
+        private readonly JoinFinder $joinFinder
     ) {
-        $this->joinFinder = $joinFinder;
-        $this->metadataFactory = $metadataFactory;
         $this->mainClassMetadata = $metadataFactory->getMetadataFor($mainEntityClass);
     }
 
@@ -190,22 +184,18 @@ class QueryBuilderPreparer
     }
 
     /**
-     * @param mixed $orderByDql
-     *
      * @throws MappingException
      */
-    protected function createOrderBy($orderByDql, OrderByInterface $sortClause): OrderBy
+    protected function createOrderBy(Composite|Math|Func|Comparison|string $orderByDql, OrderByInterface $sortClause): OrderBy
     {
         $direction = $sortClause->getDirection();
         return new OrderBy((string)$orderByDql, $direction);
     }
 
     /**
-     * @return Composite|Math|Func|Comparison|string
-     *
      * @throws MappingException
      */
-    protected function processClause(ClauseInterface $clause)
+    protected function processClause(ClauseInterface $clause): Composite|Math|Func|Comparison|string
     {
         $valueIndices = array_map([$this, 'addToParameters'], $clause->getClauseValues());
         $columnNames = array_map(function (PathInfo $pathInfo): string {
@@ -246,8 +236,13 @@ class QueryBuilderPreparer
      * @throws \Doctrine\Persistence\Mapping\MappingException
      * @throws ReflectionException
      */
-    protected function processPath(bool $isToManyAllowed, string $salt, int $accessDepth, ?string $context, array $properties): string
-    {
+    protected function processPath(
+        bool $isToManyAllowed,
+        string $salt,
+        int $accessDepth,
+        ?string $context,
+        array $properties
+    ): string {
         $originalPathLength = count($properties);
 
         /**
@@ -329,14 +324,12 @@ class QueryBuilderPreparer
      * Adds the given value to the end of the {@see parameters} array and
      * returns the int index of the added value.
      *
-     * @param mixed $value
-     *
      * @return string Index reference ("?1", "?2", ...) of the added parameter in the array.
      */
-    protected function addToParameters($value): string
+    protected function addToParameters(mixed $value): string
     {
         $parameterIndex = array_push($this->parameters, $value) - 1;
-        return "?{$parameterIndex}";
+        return "?$parameterIndex";
     }
 
     /**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace EDT\DqlQuerying\Functions;
 
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
+use Webmozart\Assert\Assert;
 
 /**
  * @template-extends AbstractClauseFunction<bool>
@@ -23,9 +24,15 @@ class BetweenInclusive extends AbstractClauseFunction
         );
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases)
+    /**
+     * @return non-empty-string
+     */
+    public function asDql(array $valueReferences, array $propertyAliases): string
     {
         [$min, $max, $value] = $this->getDqls($valueReferences, $propertyAliases);
-        return $this->expr->between($value, $min, $max);
+        $between = $this->expr->between($value, $min, $max);
+        Assert::stringNotEmpty($between);
+
+        return $between;
     }
 }

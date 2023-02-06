@@ -9,9 +9,10 @@ use Doctrine\ORM\Query\Expr\Composite;
 use Doctrine\ORM\Query\Expr\Func;
 use Doctrine\ORM\Query\Expr\Math;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
+use InvalidArgumentException;
 
 /**
- * @template-extends AbstractClauseFunction<numeric>
+ * @template-extends AbstractClauseFunction<int|float>
  */
 class Sum extends AbstractClauseFunction
 {
@@ -28,24 +29,19 @@ class Sum extends AbstractClauseFunction
         );
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases)
+    public function asDql(array $valueReferences, array $propertyAliases): Composite|Math|Func|Comparison|string
     {
         $dqlClauses = $this->getDqls($valueReferences, $propertyAliases);
         $initial = array_shift($dqlClauses);
         $sumDql = array_reduce($dqlClauses, [$this, 'sumReduce'], $initial);
-        if (null === $sumDql) {
-            throw new \InvalidArgumentException('Not enough DQL clauses to create SUM expression.');
-        }
-        return $sumDql;
+
+        return $sumDql ?? throw new InvalidArgumentException('Not enough DQL clauses to create SUM expression.');
     }
 
-    /**
-     * @param Composite|Math|Func|Comparison|string $carry
-     * @param Composite|Math|Func|Comparison|string $dqlClause
-     */
-    // do not typehint the function parameters as strings, as we must not implicitly invoke __toString
-    private function sumReduce($carry, $dqlClause): Math
-    {
+    private function sumReduce(
+        Composite|Math|Func|Comparison|string $carry,
+        Composite|Math|Func|Comparison|string $dqlClause
+    ): Math {
         return $this->expr->sum($carry, $dqlClause);
     }
 }

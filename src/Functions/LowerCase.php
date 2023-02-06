@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\Functions;
 
+use Doctrine\ORM\Query\Expr\Func;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 
 /**
@@ -22,7 +23,7 @@ class LowerCase extends AbstractClauseFunction
         );
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases)
+    public function asDql(array $valueReferences, array $propertyAliases): Func
     {
         return $this->expr->lower($this->getOnlyClause()->asDql($valueReferences, $propertyAliases));
     }

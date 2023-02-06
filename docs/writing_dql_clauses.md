@@ -95,7 +95,7 @@ class PropertyIsEmpty implements ClauseInterface
     public function __construct(array $propertyPath) {
         $this->paths = [new PathInfo(
             new PropertyPath(null, '', PropertyPath::DIRECT, $propertyPath),
-            true,
+            true
         )];
     }
     public function getClauseValues(): array

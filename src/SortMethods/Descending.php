@@ -18,13 +18,22 @@ class Descending extends \EDT\Querying\SortMethods\Descending implements OrderBy
         parent::__construct($target);
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases)
+    /**
+     * @return non-empty-string
+     */
+    public function asDql(array $valueReferences, array $propertyAliases): string
     {
         Assert::count($valueReferences, 0);
         Assert::count($propertyAliases, 1);
-        return array_pop($propertyAliases);
+        $propertyAlias = array_pop($propertyAliases);
+        Assert::stringNotEmpty($propertyAlias);
+
+        return $propertyAlias;
     }
 
+    /**
+     * @return self::DESCENDING
+     */
     public function getDirection(): string
     {
         return self::DESCENDING;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\Functions;
 
+use Doctrine\ORM\Query\Expr\Comparison;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 
 /**
@@ -31,7 +32,7 @@ class IsMemberOf extends AbstractClauseFunction
         );
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases)
+    public function asDql(array $valueReferences, array $propertyAliases): Comparison
     {
         [$contains, $contained] = $this->getDqls($valueReferences, $propertyAliases);
         return $this->expr->isMemberOf($contained, $contains);

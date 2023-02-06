@@ -1,6 +1,8 @@
 # DoctrineQueryGenerator
 
-Helper library for the [Doctrine ORM](https://www.doctrine-project.org/projects/orm.html) to generate
+Extends `edt/queries` with support for Doctrine ORM.
+
+Also functions as helper library for [Doctrine ORM](https://www.doctrine-project.org/projects/orm.html) to generate
 [DQL](https://www.doctrine-project.org/projects/doctrine-orm/en/2.7/reference/dql-doctrine-query-language.html)
 queries. Currently, the focus lies in the detection of join clauses from a given property path to sort and filter the result set.
 

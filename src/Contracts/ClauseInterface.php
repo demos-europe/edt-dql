@@ -43,6 +43,8 @@ interface ClauseInterface extends PathsBasedInterface
     public function getClauseValues(): array;
 
     /**
+     * The return ust be a part of a DQL <code>WHERE</code> condition that can be grouped using <code>AND</code> or <code>OR</code>.
+     *
      * @param string[] $valueReferences The values returned by
      *                                  {@link ClauseInterface::getClauseValues()} converted to
      *                                  index references valid in the complete and final DQL.
@@ -50,10 +52,6 @@ interface ClauseInterface extends PathsBasedInterface
      *                                  {@link ClauseInterface::getPropertyPaths()} after they have
      *                                  been processed into joins with the values provided here
      *                                  being the entity alias of the destination of the path.
-     *
-     * @return Composite|Math|Func|Comparison|string Must be a part of a DQL <code>WHERE</code>
-     *                                               condition that can be grouped using
-     *                                               <code>AND</code> or <code>OR</code>.
      */
-    public function asDql(array $valueReferences, array $propertyAliases);
+    public function asDql(array $valueReferences, array $propertyAliases): Composite|Math|Func|Comparison|string;
 }

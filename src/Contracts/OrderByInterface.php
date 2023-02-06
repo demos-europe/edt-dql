@@ -10,7 +10,7 @@ interface OrderByInterface extends ClauseInterface
     public const DESCENDING = 'DESC';
 
     /**
-     * @return string Either {@link OrderByInterface::ASCENDING} or {@link OrderByInterface::DESCENDING}.
+     * @return OrderByInterface::ASCENDING|OrderByInterface::DESCENDING
      */
     public function getDirection(): string;
 }

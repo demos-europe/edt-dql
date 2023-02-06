@@ -20,7 +20,8 @@ class StringStartsWith extends AbstractClauseFunction
     {
         parent::__construct(
             new \EDT\Querying\Functions\StringStartsWith($contains, $contained, false),
-            $contains, $contained
+            $contains,
+            $contained
         );
     }
 

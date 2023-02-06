@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\Functions;
 
+use Doctrine\ORM\Query\Expr\Func;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 
 /**
@@ -19,19 +20,20 @@ use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 class OneOf extends AbstractClauseFunction
 {
     /**
-     * @template V
-     * @param ClauseFunctionInterface<array<V>> $contains
-     * @param ClauseFunctionInterface<V>        $contained
+     * @template TValue
+     * @param ClauseFunctionInterface<array<TValue>> $contains
+     * @param ClauseFunctionInterface<TValue>        $contained
      */
     public function __construct(ClauseFunctionInterface $contains, ClauseFunctionInterface $contained)
     {
         parent::__construct(
             new \EDT\Querying\Functions\OneOf($contains, $contained),
-            $contains, $contained
+            $contains,
+            $contained
         );
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases)
+    public function asDql(array $valueReferences, array $propertyAliases): Func
     {
         [$contains, $contained] = $this->getDqls($valueReferences, $propertyAliases);
         return $this->expr->in($contained, $contains);

@@ -14,7 +14,6 @@ use EDT\DqlQuerying\Contracts\ClauseInterface;
 use EDT\Querying\Contracts\FunctionInterface;
 use EDT\Querying\Contracts\PathsBasedInterface;
 use EDT\Querying\Utilities\Iterables;
-use Webmozart\Assert\Assert;
 use function count;
 
 /**
@@ -23,10 +22,7 @@ use function count;
  */
 abstract class AbstractClauseFunction implements ClauseFunctionInterface
 {
-    /**
-     * @var FunctionInterface<TOutput>
-     */
-    private FunctionInterface $function;
+    use ClauseTrait;
 
     /**
      * @var list<ClauseInterface>
@@ -37,16 +33,17 @@ abstract class AbstractClauseFunction implements ClauseFunctionInterface
 
     /**
      * Will set the clauses of this class. By calling {@link AbstractClauseFunction::getDqls()}
-     * the {@link \EDT\DqlQuerying\Contracts\ClauseInterface::asDql()} of all clauses will be invoked and the results
+     * the {@link ClauseInterface::asDql()} of all clauses will be invoked and the results
      * returned inside an array. E.g. if you passed a single clause the returned array will contain
      * one element being the result of the clause. If you passed two clauses the returned array will
      * contain two elements, each being the result of the corresponding clause.
      *
      * @param FunctionInterface<TOutput> $function
      */
-    public function __construct(FunctionInterface $function, ClauseInterface ...$clauses)
-    {
-        $this->function = $function;
+    public function __construct(
+        private readonly FunctionInterface $function,
+        ClauseInterface ...$clauses
+    ) {
         $this->clauses = $clauses;
         $this->expr = new Expr();
     }
@@ -112,17 +109,6 @@ abstract class AbstractClauseFunction implements ClauseFunctionInterface
         );
 
         return array_map('array_values', Iterables::split($valueReferences, ...$clauseValueCountables));
-    }
-
-    /**
-     * Can be used if a single clause was passed to {@link AbstractClauseFunction::setClauses()} to
-     * get its DQL directly. If not exactly one clause was passed in the setter then this
-     * function call will throw an exception.
-     */
-    protected function getOnlyClause(): ClauseInterface
-    {
-        Assert::count($this->clauses, 1);
-        return $this->clauses[0];
     }
 
     /**

@@ -14,19 +14,15 @@ use Exception;
 use InvalidArgumentException;
 use ReflectionException;
 use function array_key_exists;
-use function get_class;
 
 /**
  * @internal
  */
 class JoinFinder
 {
-    private ClassMetadataFactory $metadataFactory;
-
-    public function __construct(ClassMetadataFactory $metadataFactory)
-    {
-        $this->metadataFactory = $metadataFactory;
-    }
+    public function __construct(
+        private readonly ClassMetadataFactory $metadataFactory
+    ) {}
 
     /**
      * Find the joins needed for the actual 'where' expression from the property path.
@@ -164,13 +160,13 @@ class JoinFinder
             $entityClass = $metadata->getAssociationTargetClass($relationshipName);
             $classMetadata = $this->metadataFactory->getMetadataFor($entityClass);
             if (!$classMetadata instanceof ClassMetadataInfo) {
-                $type = get_class($classMetadata);
+                $type = $classMetadata::class;
                 throw new InvalidArgumentException("Expected ClassMetadataInfo, got $type");
             }
 
             return $classMetadata;
-        } catch (OrmMappingException | PersistenceMappingException | ReflectionException $e) {
-            throw MappingException::relationshipUnavailable($relationshipName, $metadata->getName(), $e);
+        } catch (OrmMappingException | PersistenceMappingException | ReflectionException $exception) {
+            throw MappingException::relationshipUnavailable($relationshipName, $metadata->getName(), $exception);
         }
     }
 

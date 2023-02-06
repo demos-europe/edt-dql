@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace EDT\DqlQuerying\Functions;
 
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
+use Webmozart\Assert\Assert;
 
 /**
  * @template-extends AbstractClauseFunction<bool>
@@ -22,9 +23,15 @@ class IsNull extends AbstractClauseFunction
         );
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases)
+    /**
+     * @return non-empty-string
+     */
+    public function asDql(array $valueReferences, array $propertyAliases): string
     {
         $maybeNull = $this->getOnlyClause()->asDql($valueReferences, $propertyAliases);
-        return $this->expr->isNull($maybeNull);
+        $isNull = $this->expr->isNull($maybeNull);
+        Assert::stringNotEmpty($isNull);
+
+        return $isNull;
     }
 }

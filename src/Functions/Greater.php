@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\Functions;
 
+use Doctrine\ORM\Query\Expr\Comparison;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 
 /**
@@ -19,7 +20,7 @@ class Greater extends AbstractClauseFunction
         );
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases)
+    public function asDql(array $valueReferences, array $propertyAliases): Comparison
     {
         [$left, $right] = $this->getDqls($valueReferences, $propertyAliases);
         return $this->expr->gt($left, $right);

@@ -18,13 +18,22 @@ class Ascending extends \EDT\Querying\SortMethods\Ascending implements OrderBySo
         parent::__construct($target);
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases)
+    /**
+     * @return non-empty-string
+     */
+    public function asDql(array $valueReferences, array $propertyAliases): string
     {
         Assert::count($valueReferences, 0);
         Assert::count($propertyAliases, 1);
-        return array_pop($propertyAliases);
+        $propertyAlias = array_pop($propertyAliases);
+        Assert::stringNotEmpty($propertyAlias);
+
+        return $propertyAlias;
     }
 
+    /**
+     * @return self::ASCENDING
+     */
     public function getDirection(): string
     {
         return self::ASCENDING;
