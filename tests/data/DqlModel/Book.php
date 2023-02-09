@@ -6,31 +6,23 @@ namespace Tests\data\DqlModel;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity()
- */
+#[ORM\Entity]
 class Book
 {
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue
-     */
+    #[ORM\Id]
+    #[ORM\Column(type: 'integer')]
+    #[ORM\GeneratedValue]
     private int $id;
 
-    /**
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Column(type: 'string')]
     protected string $title;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Person", inversedBy="books")
-     */
+    #[ORM\ManyToOne(targetEntity: Person::class, inversedBy: 'books')]
     protected Person $author;
 
     /**
      * @var string[]
-     * @ORM\Column(type="simple_array")
      */
+    #[ORM\Column(type: 'simple_array')]
     protected array $tags;
 }

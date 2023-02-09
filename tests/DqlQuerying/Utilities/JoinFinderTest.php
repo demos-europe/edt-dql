@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\DqlQuerying\Utilities;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
+use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Tools\Setup;
 use EDT\DqlQuerying\Contracts\MappingException;
@@ -37,7 +35,7 @@ class JoinFinderTest extends TestCase
             false
         );
         $paths = [__DIR__.'/tests/Model'];
-        $driver = new AnnotationDriver(new AnnotationReader(), $paths);
+        $driver = new AttributeDriver($paths);
         $config->setMetadataDriverImpl($driver);
         $conn = [
             'driver' => 'pdo_sqlite',

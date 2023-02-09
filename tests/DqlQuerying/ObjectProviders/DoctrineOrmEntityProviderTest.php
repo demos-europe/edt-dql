@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\DqlQuerying\ObjectProviders;
 
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
+use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\Tools\Setup;
 use EDT\DqlQuerying\ConditionFactories\DqlConditionFactory;
@@ -27,7 +25,6 @@ use EDT\DqlQuerying\Utilities\QueryBuilderPreparer;
 use EDT\DqlQuerying\SortMethodFactories\SortMethodFactory;
 use EDT\Querying\Contracts\PropertyPathAccessInterface;
 use EDT\Querying\PropertyPaths\PropertyPath;
-use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Tests\data\DqlModel\Book;
 use Tests\data\DqlModel\Person;
@@ -63,7 +60,7 @@ class DoctrineOrmEntityProviderTest extends TestCase
             false
         );
         $paths = [__DIR__.'/tests/data/Model'];
-        $driver = new AnnotationDriver(new AnnotationReader(), $paths);
+        $driver = new AttributeDriver($paths);
         $config->setMetadataDriverImpl($driver);
         $conn = [
             'driver' => 'pdo_sqlite',
