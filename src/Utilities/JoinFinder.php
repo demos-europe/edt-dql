@@ -14,6 +14,7 @@ use Exception;
 use InvalidArgumentException;
 use ReflectionException;
 use function array_key_exists;
+use function get_class;
 
 /**
  * @internal
@@ -160,7 +161,7 @@ class JoinFinder
             $entityClass = $metadata->getAssociationTargetClass($relationshipName);
             $classMetadata = $this->metadataFactory->getMetadataFor($entityClass);
             if (!$classMetadata instanceof ClassMetadataInfo) {
-                $type = $classMetadata::class;
+                $type = get_class($classMetadata);
                 throw new InvalidArgumentException("Expected ClassMetadataInfo, got $type");
             }
 
