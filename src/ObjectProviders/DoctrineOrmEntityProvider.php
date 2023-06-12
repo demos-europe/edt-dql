@@ -11,43 +11,26 @@ use EDT\DqlQuerying\Contracts\MappingException;
 use EDT\DqlQuerying\Utilities\QueryBuilderPreparer;
 use EDT\DqlQuerying\Contracts\OrderByInterface;
 use EDT\Querying\Pagination\OffsetPagination;
-use EDT\Querying\Contracts\ObjectProviderInterface;
+use EDT\Querying\Contracts\OffsetEntityProviderInterface;
 use EDT\Querying\Contracts\PaginationException;
-use EDT\Querying\EntityProviders\OffsetPaginatingEntityProviderInterface;
+use Webmozart\Assert\Assert;
 
 /**
  * @template TEntity of object
- * @template-implements ObjectProviderInterface<ClauseInterface, OrderByInterface, TEntity>
- * @template-implements OffsetPaginatingEntityProviderInterface<ClauseInterface, OrderByInterface, TEntity>
+ * @template-implements OffsetEntityProviderInterface<ClauseInterface, OrderByInterface, TEntity>
  */
-class DoctrineOrmEntityProvider implements ObjectProviderInterface, OffsetPaginatingEntityProviderInterface
+class DoctrineOrmEntityProvider implements OffsetEntityProviderInterface
 {
+    /**
+     * @param class-string<TEntity> $entityClass
+     */
     public function __construct(
-        private readonly EntityManager $entityManager,
-        private readonly QueryBuilderPreparer $builderPreparer
+        protected readonly EntityManager $entityManager,
+        protected readonly QueryBuilderPreparer $builderPreparer,
+        protected readonly string $entityClass
     ) {}
 
-    /**
-     * @throws MappingException
-     * @throws PaginationException
-     */
-    public function getObjects(array $conditions, array $sortMethods = [], int $offset = 0, int $limit = null): iterable
-    {
-        $queryBuilder = $this->generateQueryBuilder($conditions, $sortMethods, $offset, $limit);
-        return $queryBuilder->getQuery()->getResult();
-    }
-
-    /**
-     * @param list<ClauseInterface>  $conditions
-     * @param list<OrderByInterface> $sortMethods
-     * @param OffsetPagination|null  $pagination
-     *
-     * @return iterable<TEntity>
-     *
-     * @throws MappingException
-     * @throws PaginationException
-     */
-    public function getEntities(array $conditions, array $sortMethods, ?object $pagination): iterable
+    public function getEntities(array $conditions, array $sortMethods, ?OffsetPagination $pagination): array
     {
         if (null === $pagination) {
             $offset = 0;
@@ -58,7 +41,11 @@ class DoctrineOrmEntityProvider implements ObjectProviderInterface, OffsetPagina
         }
 
         $queryBuilder = $this->generateQueryBuilder($conditions, $sortMethods, $offset, $limit);
-        return $queryBuilder->getQuery()->getResult();
+        $result = $queryBuilder->getQuery()->getResult();
+        Assert::isList($result);
+        Assert::allIsInstanceOf($result, $this->entityClass);
+
+        return $result;
     }
 
     /**

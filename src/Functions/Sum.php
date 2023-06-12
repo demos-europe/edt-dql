@@ -38,7 +38,7 @@ class Sum extends AbstractClauseFunction
         return $sumDql ?? throw new InvalidArgumentException('Not enough DQL clauses to create SUM expression.');
     }
 
-    private function sumReduce(
+    protected function sumReduce(
         Composite|Math|Func|Comparison|string $carry,
         Composite|Math|Func|Comparison|string $dqlClause
     ): Math {

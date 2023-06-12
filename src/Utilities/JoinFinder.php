@@ -22,7 +22,7 @@ use function get_class;
 class JoinFinder
 {
     public function __construct(
-        private readonly ClassMetadataFactory $metadataFactory
+        protected readonly ClassMetadataFactory $metadataFactory
     ) {}
 
     /**
@@ -44,6 +44,7 @@ class JoinFinder
      * different paths:
      * * `t_58fb870d_Person` in case of a join to the `authors` of a `Book` entity
      *
+     * @param ClassMetadataInfo<object> $classMetadata
      * @param list<non-empty-string> $path
      *
      * @return array<non-empty-string, Join> The needed joins. The key will be the alias of
@@ -78,6 +79,7 @@ class JoinFinder
      * @param string $pathSalt will be used when generating the tables aliases to distinguish the
      *                         segments in this path from segments in other paths that use the same
      *                         table name
+     * @param ClassMetadataInfo<object> $classMetadata
      * @param non-empty-string $pathPart
      * @param non-empty-string ...$morePathParts
      *
@@ -85,7 +87,7 @@ class JoinFinder
      * @throws MappingException
      * @throws OrmMappingException
      */
-    private function findJoinsRecursive(
+    protected function findJoinsRecursive(
         bool $toManyAllowed,
         string $pathSalt,
         ClassMetadataInfo $classMetadata,
@@ -145,6 +147,8 @@ class JoinFinder
      * The prefixing allows to distinguish multiple usages of the same table in different contextes,
      * e.g. different paths or separate `from` clauses.
      *
+     * @param ClassMetadataInfo<object> $tableInfo
+     *
      * @return non-empty-string
      */
     public function createTableAlias(string $prefix, ClassMetadataInfo $tableInfo): string
@@ -153,6 +157,10 @@ class JoinFinder
     }
 
     /**
+     * @param ClassMetadataInfo<object> $metadata
+     *
+     * @return ClassMetadataInfo<object>
+     *
      * @throws MappingException
      */
     protected function getTargetClassMetadata(string $relationshipName, ClassMetadataInfo $metadata): ClassMetadataInfo
@@ -172,21 +180,31 @@ class JoinFinder
     }
 
     /**
+     * @param ClassMetadataInfo<object> $classMetadata
+     *
      * @throws OrmMappingException
      */
-    private function isToManyRelationship(ClassMetadataInfo $classMetadata, string $property): bool
+    protected function isToManyRelationship(ClassMetadataInfo $classMetadata, string $property): bool
     {
         $mapping = $classMetadata->getAssociationMapping($property);
 
         return (bool) ($mapping['type'] & ClassMetadataInfo::TO_MANY);
     }
 
-    private function isRelationship(ClassMetadataInfo $classMetadata, string $property): bool
+    /**
+     * @param ClassMetadataInfo<object> $classMetadata
+     * @param non-empty-string $property
+     */
+    protected function isRelationship(ClassMetadataInfo $classMetadata, string $property): bool
     {
         return $classMetadata->hasAssociation($property);
     }
 
-    private function isAttribute(ClassMetadataInfo $classMetadata, string $property): bool
+    /**
+     * @param ClassMetadataInfo<object> $classMetadata
+     * @param non-empty-string $property
+     */
+    protected function isAttribute(ClassMetadataInfo $classMetadata, string $property): bool
     {
         return $classMetadata->hasField($property);
     }

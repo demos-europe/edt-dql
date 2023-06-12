@@ -43,7 +43,7 @@ interface ClauseInterface extends PathsBasedInterface
     public function getClauseValues(): array;
 
     /**
-     * The return ust be a part of a DQL <code>WHERE</code> condition that can be grouped using <code>AND</code> or <code>OR</code>.
+     * The return must be a part of a DQL <code>WHERE</code> condition that can be grouped using <code>AND</code> or <code>OR</code>.
      *
      * @param string[] $valueReferences The values returned by
      *                                  {@link ClauseInterface::getClauseValues()} converted to

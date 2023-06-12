@@ -25,7 +25,7 @@ class Constant extends \EDT\Querying\Functions\Value implements ClauseFunctionIn
      */
     public function __construct(
         mixed $phpValue,
-        private readonly Composite|Math|Func|Comparison|string $dqlValue
+        protected readonly Composite|Math|Func|Comparison|string $dqlValue
     ) {
         parent::__construct($phpValue);
     }

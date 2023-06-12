@@ -75,11 +75,13 @@ class DoctrineOrmEntityProviderTest extends TestCase
         $this->personBuilderPreparer = new QueryBuilderPreparer(Person::class, $metadataFactory, $joinFinder);
         $this->bookEntityProvider = new DoctrineOrmEntityProvider(
             $this->entityManager,
-            $bookBuilderPreparer
+            $bookBuilderPreparer,
+            Book::class
         );
         $this->personEntityProvider = new DoctrineOrmEntityProvider(
             $this->entityManager,
-            $this->personBuilderPreparer
+            $this->personBuilderPreparer,
+            Book::class
         );
     }
 
