@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\ObjectProviders;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use EDT\DqlQuerying\Contracts\ClauseInterface;
 use EDT\DqlQuerying\Contracts\MappingException;
@@ -25,7 +25,7 @@ class DoctrineOrmEntityProvider implements OffsetEntityProviderInterface
      * @param class-string<TEntity> $entityClass
      */
     public function __construct(
-        protected readonly EntityManager $entityManager,
+        protected readonly EntityManagerInterface $entityManager,
         protected readonly QueryBuilderPreparer $builderPreparer,
         protected readonly string $entityClass
     ) {}
