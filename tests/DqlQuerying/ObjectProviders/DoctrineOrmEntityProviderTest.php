@@ -10,7 +10,9 @@ use Doctrine\ORM\Mapping\Driver\AttributeDriver;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\Tools\Setup;
 use EDT\DqlQuerying\ConditionFactories\DqlConditionFactory;
+use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 use EDT\DqlQuerying\Contracts\MappingException;
+use EDT\DqlQuerying\Contracts\OrderByInterface;
 use EDT\DqlQuerying\Functions\AllEqual;
 use EDT\DqlQuerying\Functions\AllTrue;
 use EDT\DqlQuerying\Functions\Product;
@@ -40,12 +42,12 @@ class DoctrineOrmEntityProviderTest extends TestCase
     private QueryBuilderPreparer $personBuilderPreparer;
 
     /**
-     * @var DoctrineOrmEntityProvider<Person>
+     * @var DoctrineOrmEntityProvider<ClauseFunctionInterface<bool>, OrderByInterface, Person>
      */
     private DoctrineOrmEntityProvider $personEntityProvider;
 
     /**
-     * @var DoctrineOrmEntityProvider<Book>
+     * @var DoctrineOrmEntityProvider<ClauseFunctionInterface<bool>, OrderByInterface, Book>
      */
     private DoctrineOrmEntityProvider $bookEntityProvider;
 

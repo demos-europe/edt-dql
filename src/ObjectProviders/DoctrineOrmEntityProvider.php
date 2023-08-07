@@ -16,8 +16,11 @@ use EDT\Querying\Contracts\PaginationException;
 use Webmozart\Assert\Assert;
 
 /**
+ * @template TCondition of ClauseInterface
+ * @template TSorting of OrderByInterface
  * @template TEntity of object
- * @template-implements OffsetEntityProviderInterface<ClauseInterface, OrderByInterface, TEntity>
+ *
+ * @template-implements OffsetEntityProviderInterface<TCondition, TSorting, TEntity>
  */
 class DoctrineOrmEntityProvider implements OffsetEntityProviderInterface
 {
