@@ -6,7 +6,10 @@
     "require": {
         "doctrine/orm": "^2.5",
         "php": "^8.1",
-        "demos-europe/edt-queries": "^0.23"
+        "demos-europe/edt-queries": "^0.23",
+        "demos-europe/edt-paths": "^0.23",
+        "nette/php-generator": "^4.0",
+        "symfony/cache": "^5"
     },
     "authors": [
         {
@@ -25,7 +28,6 @@
         }
     },
     "require-dev": {
-        "doctrine/cache": "^2.2"
     },
     "conflict": {
         "demos-europe/edt-extra": "<0.17.1",
