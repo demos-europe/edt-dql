@@ -9,13 +9,13 @@ use Doctrine\ORM\Mapping\ManyToMany;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
+use EDT\Parsing\Utilities\ClassOrInterfaceType;
 use EDT\PathBuilding\End;
 use EDT\PathBuilding\PropertyAutoPathInterface;
 use EDT\PathBuilding\PropertyAutoPathTrait;
 use Nette\PhpGenerator\PhpFile;
 use ReflectionClass;
 use ReflectionProperty;
-use Webmozart\Assert\Assert;
 
 /**
  * Generates source code for a class implementing {@link PropertyAutoPathInterface}.
@@ -31,7 +31,7 @@ class PathClassFromEntityGenerator
     /**
      * Generates a class with methods to start each given path class.
      *
-     * @param list<array{0: non-empty-string, 1: non-empty-string}> $pathClasses
+     * @param list<ClassOrInterfaceType> $pathClasses
      * @param non-empty-string $targetName
      * @param non-empty-string $targetNamespace
      */
@@ -48,13 +48,21 @@ class PathClassFromEntityGenerator
 
         // Iterate over the properties of the entity class
         foreach ($pathClasses as $pathClass) {
-            $fqcn = "$pathClass[0]\\$pathClass[1]";
+            $shortClassName = $pathClass->getShortClassName();
+            $fqcn = $pathClass->getFullyQualifiedName();
 
-            $method = $class->addMethod(lcfirst($pathClass[1]));
+            // add use declarations
+            array_map([$namespace, 'addUse'], $pathClass->getAllFullyQualifiedNames());
+
+            // add method
+            $method = $class->addMethod(lcfirst($shortClassName));
+            $fullTypeString = $pathClass->getFullString(true);
+            if ($fullTypeString !== $shortClassName) {
+                $method->addComment("@return $fullTypeString");
+            }
             $method->setStatic();
             $method->setPublic();
-
-            $method->addBody("return $fqcn::startPath();");
+            $method->addBody("return $shortClassName::startPath();");
             $method->setReturnType($fqcn);
         }
 
