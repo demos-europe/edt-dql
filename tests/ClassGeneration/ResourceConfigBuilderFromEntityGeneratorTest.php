@@ -38,16 +38,16 @@ use Tests\ClassGeneration\EntityB;
  *
  * @template-extends MagicResourceConfigBuilder<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA>
  *
- * @property-read AttributeConfigBuilderInterface<FunctionInterface<bool>,EntityA> $propertyA {@link AttributeConfigBuilderInterface::propertyA}
- * @property-read ToManyRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyB {@link ToManyRelationshipConfigBuilderInterface::propertyB}
- * @property-read ToManyRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyC {@link ToManyRelationshipConfigBuilderInterface::propertyC}
- * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyD {@link ToOneRelationshipConfigBuilderInterface::propertyD}
- * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyE {@link ToOneRelationshipConfigBuilderInterface::propertyE}
- * @property-read AttributeConfigBuilderInterface<FunctionInterface<bool>,EntityA> $propertyF {@link AttributeConfigBuilderInterface::propertyF}
- * @property-read ToManyRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyG {@link ToManyRelationshipConfigBuilderInterface::propertyG}
- * @property-read ToManyRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyH {@link ToManyRelationshipConfigBuilderInterface::propertyH}
- * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyI {@link ToOneRelationshipConfigBuilderInterface::propertyI}
- * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyJ {@link ToOneRelationshipConfigBuilderInterface::propertyJ}
+ * @property-read AttributeConfigBuilderInterface<FunctionInterface<bool>,EntityA> $propertyA {@link EntityA::propertyA}
+ * @property-read ToManyRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyB {@link EntityA::propertyB}
+ * @property-read ToManyRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyC {@link EntityA::propertyC}
+ * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyD {@link EntityA::propertyD}
+ * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyE {@link EntityA::propertyE}
+ * @property-read AttributeConfigBuilderInterface<FunctionInterface<bool>,EntityA> $propertyF {@link EntityA::propertyF}
+ * @property-read ToManyRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyG {@link EntityA::propertyG}
+ * @property-read ToManyRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyH {@link EntityA::propertyH}
+ * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyI {@link EntityA::propertyI}
+ * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyJ {@link EntityA::propertyJ}
  */
 class EntityAConfig extends \MagicResourceConfigBuilder
 {

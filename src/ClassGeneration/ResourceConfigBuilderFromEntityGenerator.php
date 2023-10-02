@@ -62,15 +62,15 @@ class ResourceConfigBuilderFromEntityGenerator
                 ReflectionProperty $property,
                 Column|OneToMany|OneToOne|ManyToOne|ManyToMany $doctrinePropertySetting
             ) use ($class, $entityType, $namespace): void {
-                $targetType = $this->mapToClass($entityType, $doctrinePropertySetting);
+                $targetType = $this->mapToClass($entityType, $doctrinePropertySetting, $property);
                 $propertyName = $property->getName();
 
                 // add uses
                 array_map([$namespace, 'addUse'], $targetType->getAllFullyQualifiedNames());
 
                 // build reference
-                $shortClassName = $targetType->getShortClassName();
-                $reference = "{@link $shortClassName::$propertyName}";
+                $referencedClass = $entityType->getShortClassName();
+                $reference = "{@link $referencedClass::$propertyName}";
 
                 // add property-read tag
                 $shortString = $targetType->getFullString(true);
@@ -81,7 +81,7 @@ class ResourceConfigBuilderFromEntityGenerator
         return $newFile;
     }
 
-    protected function mapToClass(TypeInterface $entityClass, Column|OneToMany|OneToOne|ManyToOne|ManyToMany $annotationOrAttribute): ClassOrInterfaceType
+    protected function mapToClass(TypeInterface $entityClass, Column|OneToMany|OneToOne|ManyToOne|ManyToMany $annotationOrAttribute, ReflectionProperty $property): ClassOrInterfaceType
     {
         if ($annotationOrAttribute instanceof Column) {
             $class = AttributeConfigBuilderInterface::class;
@@ -95,6 +95,12 @@ class ResourceConfigBuilderFromEntityGenerator
 
         $targetEntityClass = $annotationOrAttribute->targetEntity;
         Assert::notNull($targetEntityClass);
+        if (!interface_exists($targetEntityClass) && !class_exists($targetEntityClass)) {
+            throw new \InvalidArgumentException(
+                "Doctrine relationship was defined via annotation/attribute, but the type set as target entity (`$targetEntityClass`) could not be found. Make sure it uses the fully qualified name. The problematic relationship is: `{$entityClass->getFullString(false)}::{$property->getName()}`."
+            );
+        }
+
         $templateParameters = [
             $this->conditionType,
             $this->sortingType,

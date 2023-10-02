@@ -8,6 +8,7 @@ use EDT\DqlQuerying\ClassGeneration\PathClassFromEntityGenerator;
 use EDT\Parsing\Utilities\NonClassOrInterfaceType;
 use EDT\Parsing\Utilities\ClassOrInterfaceType;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 class PathClassFromEntityGeneratorTest extends TestCase
 {
@@ -75,7 +76,7 @@ class Paths
     public function testGenerateFromEntity()
     {
         $generator = new PathClassFromEntityGenerator();
-        $entityAReflectionClass = new \ReflectionClass(EntityA::class);
+        $entityAReflectionClass = new ReflectionClass(EntityA::class);
         $file = $generator->generatePathClass($entityAReflectionClass, 'EntityAPath', 'Foobar');
         self::assertSame(self::ENTITY_A_PATH, (string) $file);
     }
