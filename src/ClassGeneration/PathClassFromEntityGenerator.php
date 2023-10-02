@@ -54,7 +54,6 @@ class PathClassFromEntityGenerator
         // Iterate over the properties of the entity class
         foreach ($pathClasses as $pathClass) {
             $shortClassName = $pathClass->getShortClassName();
-            $fqcn = $pathClass->getFullyQualifiedName();
 
             // add use declarations
             array_map([$namespace, 'addUse'], $pathClass->getAllFullyQualifiedNames());
@@ -68,7 +67,7 @@ class PathClassFromEntityGenerator
             $method->setStatic();
             $method->setPublic();
             $method->addBody("return $shortClassName::startPath();");
-            $method->setReturnType($fqcn);
+            $method->setReturnType($pathClass->getFullyQualifiedName());
         }
 
         return $newFile;

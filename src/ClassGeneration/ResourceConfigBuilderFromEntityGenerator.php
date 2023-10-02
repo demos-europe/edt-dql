@@ -16,6 +16,7 @@ use EDT\Parsing\Utilities\ClassOrInterfaceType;
 use EDT\Parsing\Utilities\TypeInterface;
 use EDT\PathBuilding\DocblockPropertyByTraitEvaluator;
 use Nette\PhpGenerator\PhpFile;
+use ReflectionClass;
 use ReflectionProperty;
 use Webmozart\Assert\Assert;
 use function array_key_exists;
@@ -53,6 +54,8 @@ class ResourceConfigBuilderFromEntityGenerator
         $newFile = new PhpFile();
         $newFile->setStrictTypes();
 
+        $reflectionClass = new ReflectionClass($entityType->getFullyQualifiedName());
+
         $namespace = $newFile->addNamespace($targetNamespace);
         array_map([$namespace, 'addUse'], $this->parentClass->getAllFullyQualifiedNames());
 
@@ -69,7 +72,7 @@ class ResourceConfigBuilderFromEntityGenerator
 
         // skip properties that are already defined in the parent class
         $properties = array_filter(
-            $entityType->getProperties(),
+            $reflectionClass->getProperties(),
             fn (ReflectionProperty $property): bool => !array_key_exists($property->getName(), $this->existingProperties)
         );
 

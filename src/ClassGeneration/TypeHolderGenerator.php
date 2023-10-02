@@ -38,7 +38,7 @@ class TypeHolderGenerator
             // add use declarations
             array_map([$namespace, 'addUse'], $injectionClass->getAllFullyQualifiedNames());
 
-            $fqcn = $injectionClass->getFullyQualifiedName();
+            $fullyQualifiedName = $injectionClass->getFullyQualifiedName();
             $shortClassName = $injectionClass->getShortClassName();
             $propertyType = $injectionClass->getFullString(true);
             $propertyName = lcfirst($shortClassName);
@@ -46,7 +46,7 @@ class TypeHolderGenerator
             // fill constructor
             // property promotion is not yet supported (not even with workarounds)
             $parameter = $constructor->addParameter($propertyName);
-            $parameter->setType($fqcn);
+            $parameter->setType($fullyQualifiedName);
             $constructor->addComment("@param $propertyType");
             $constructor->addBody("\$this->$propertyName = $propertyName;");
 
@@ -54,13 +54,13 @@ class TypeHolderGenerator
             $property = $class->addProperty($propertyName);
             $property->addComment("@var $propertyType");
             $property->setProtected();
-            $property->setType($fqcn);
+            $property->setType($fullyQualifiedName);
 
             // add getter method
             $method = $class->addMethod("get$shortClassName");
             $method->addComment("@return $propertyType");
             $method->setPublic();
-            $method->setReturnType($fqcn);
+            $method->setReturnType($fullyQualifiedName);
             $method->addBody("return \$this->$propertyName;");
         }
 
