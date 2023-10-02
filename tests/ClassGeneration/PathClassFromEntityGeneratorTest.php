@@ -25,6 +25,7 @@ namespace Foobar;
  * To add additional properties, you may want to
  * create an extending class and add them there.
  *
+ * @property-read EDT\PathBuilding\End $id
  * @property-read EDT\PathBuilding\End $propertyA
  * @property-read Tests\ClassGeneration\EntityBPath $propertyB
  * @property-read Tests\ClassGeneration\EntityBPath $propertyC
@@ -93,7 +94,8 @@ class Paths
                 ])
             ],
             'Paths',
-            'Bar'
+            'Bar',
+            static fn (ClassOrInterfaceType $pathClass): string => lcfirst($pathClass->getShortClassName())
         );
         self::assertSame(self::PATHS, (string) $file);
     }

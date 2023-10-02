@@ -9,6 +9,9 @@ use EDT\DqlQuerying\Contracts\OrderBySortMethodInterface;
 use EDT\JsonApi\ResourceConfig\Builder\MagicResourceConfigBuilder;
 use EDT\Parsing\Utilities\ClassOrInterfaceType;
 use EDT\Parsing\Utilities\NonClassOrInterfaceType;
+use EDT\PathBuilding\DocblockPropertyByTraitEvaluator;
+use EDT\PathBuilding\PropertyTag;
+use EDT\PathBuilding\TraitEvaluator;
 use EDT\Querying\Contracts\FunctionInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -49,7 +52,7 @@ use Tests\ClassGeneration\EntityB;
  * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyI {@link EntityA::propertyI}
  * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyJ {@link EntityA::propertyJ}
  */
-class EntityAConfig extends \MagicResourceConfigBuilder
+class EntityAConfig extends MagicResourceConfigBuilder
 {
 }
 ';
@@ -67,14 +70,24 @@ class EntityAConfig extends \MagicResourceConfigBuilder
             [$conditionClass, $sortingClass, $entityClass]
         );
 
+        $traitEvaluator = new DocblockPropertyByTraitEvaluator(
+            new TraitEvaluator(),
+            [],
+            [PropertyTag::PROPERTY_READ]
+        );
+
         $generator = new ResourceConfigBuilderFromEntityGenerator(
             $conditionClass,
             $sortingClass,
-            $parentClass
+            $parentClass,
+            $traitEvaluator
         );
 
-        $file = $generator
-            ->generateConfigBuilderClass($entityClass, 'EntityAConfig', 'Foobar');
+        $file = $generator->generateConfigBuilderClass(
+            $entityClass,
+            'EntityAConfig',
+            'Foobar',
+        );
 
         self::assertSame(self::ENTITY_A_CONFIG, (string)$file);
     }

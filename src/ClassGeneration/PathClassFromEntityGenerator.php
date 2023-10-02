@@ -34,9 +34,14 @@ class PathClassFromEntityGenerator
      * @param list<ClassOrInterfaceType> $pathClasses
      * @param non-empty-string $targetName
      * @param non-empty-string $targetNamespace
+     * @param callable(ClassOrInterfaceType): string $methodNameCallback
      */
-    public function generateEntryPointClass(array $pathClasses, string $targetName, string $targetNamespace): PhpFile
-    {
+    public function generateEntryPointClass(
+        array $pathClasses,
+        string $targetName,
+        string $targetNamespace,
+        callable $methodNameCallback
+    ): PhpFile {
         $newFile = new PhpFile();
         $newFile->setStrictTypes();
 
@@ -55,7 +60,7 @@ class PathClassFromEntityGenerator
             array_map([$namespace, 'addUse'], $pathClass->getAllFullyQualifiedNames());
 
             // add method
-            $method = $class->addMethod(lcfirst($shortClassName));
+            $method = $class->addMethod($methodNameCallback($pathClass));
             $fullTypeString = $pathClass->getFullString(true);
             if ($fullTypeString !== $shortClassName) {
                 $method->addComment("@return $fullTypeString");

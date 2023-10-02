@@ -14,19 +14,30 @@ use EDT\JsonApi\PropertyConfig\Builder\ToManyRelationshipConfigBuilderInterface;
 use EDT\JsonApi\PropertyConfig\Builder\ToOneRelationshipConfigBuilderInterface;
 use EDT\Parsing\Utilities\ClassOrInterfaceType;
 use EDT\Parsing\Utilities\TypeInterface;
+use EDT\PathBuilding\DocblockPropertyByTraitEvaluator;
 use Nette\PhpGenerator\PhpFile;
 use ReflectionProperty;
 use Webmozart\Assert\Assert;
+use function array_key_exists;
 
 class ResourceConfigBuilderFromEntityGenerator
 {
     use EntityBasedGeneratorTrait;
 
+    /**
+     * @var array<non-empty-string, TypeInterface>
+     */
+    private readonly array $existingProperties;
+
     public function __construct(
-        protected readonly TypeInterface        $conditionType,
-        protected readonly TypeInterface        $sortingType,
-        protected readonly ClassOrInterfaceType $parentClass
-    ) {}
+        protected readonly TypeInterface $conditionType,
+        protected readonly TypeInterface $sortingType,
+        protected readonly ClassOrInterfaceType $parentClass,
+        protected readonly DocblockPropertyByTraitEvaluator $traitEvaluator
+    ) {
+        $this->existingProperties = $this->traitEvaluator
+            ->parseProperties($this->parentClass->getFullyQualifiedName(), true);
+    }
 
     /**
      * Generate a config builder class from the given base class.
@@ -52,12 +63,18 @@ class ResourceConfigBuilderFromEntityGenerator
         $class->addComment('To add additional properties, you may want to');
         $class->addComment("create an extending class and add them there.\n");
 
-        $class->setExtends($this->parentClass->getShortClassName());
+        $class->setExtends($this->parentClass->getFullyQualifiedName());
         $class->addComment("@template-extends {$this->parentClass->getFullString(true)}");
         $class->addComment('');
 
-        $this->processProperties(
+        // skip properties that are already defined in the parent class
+        $properties = array_filter(
             $entityType->getProperties(),
+            fn (ReflectionProperty $property): bool => !array_key_exists($property->getName(), $this->existingProperties)
+        );
+
+        $this->processProperties(
+            $properties,
             function (
                 ReflectionProperty $property,
                 Column|OneToMany|OneToOne|ManyToOne|ManyToMany $doctrinePropertySetting

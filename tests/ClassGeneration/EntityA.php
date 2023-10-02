@@ -9,6 +9,9 @@ use Doctrine\ORM\Mapping as ORM;
 class EntityA
 {
     #[ORM\Column]
+    protected $id;
+
+    #[ORM\Column]
     protected $propertyA;
 
     #[ORM\ManyToMany(targetEntity: EntityB::class)]
