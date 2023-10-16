@@ -36,8 +36,8 @@ class Foo
 
 
 	/**
-	 * @param AuthorType
-	 * @param BookType<bool,\'foobar\'>
+	 * @param AuthorType $authorType
+	 * @param BookType<bool,\'foobar\'> $bookType
 	 */
 	public function __construct(AuthorType $authorType, BookType $bookType)
 	{

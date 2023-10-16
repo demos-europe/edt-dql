@@ -47,7 +47,7 @@ class TypeHolderGenerator
             // property promotion is not yet supported (not even with workarounds)
             $parameter = $constructor->addParameter($propertyName);
             $parameter->setType($fullyQualifiedName);
-            $constructor->addComment("@param $propertyType");
+            $constructor->addComment("@param $propertyType \$$propertyName");
             $constructor->addBody("\$this->$propertyName = \$$propertyName;");
 
             // add property
