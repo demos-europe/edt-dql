@@ -11,8 +11,9 @@ use Doctrine\ORM\Mapping\ManyToMany;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\OneToMany;
 use Doctrine\ORM\Mapping\OneToOne;
+use EDT\Parsing\Utilities\ClassOrInterfaceType;
+use InvalidArgumentException;
 use ReflectionAttribute;
-use ReflectionClass;
 use ReflectionProperty;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Webmozart\Assert\Assert;
@@ -91,5 +92,36 @@ trait EntityBasedGeneratorTrait
                 || $input instanceof ManyToOne
                 || $input instanceof ManyToMany
         );
+    }
+
+    /**
+     * @param non-empty-string $propertyName
+     *
+     * @return non-empty-string
+     */
+    protected function buildReference(ClassOrInterfaceType $entityType, string $propertyName): string
+    {
+        $referencedClass = $entityType->getShortClassName();
+
+        return "{@link $referencedClass::$propertyName}";
+    }
+
+    /**
+     * @param non-empty-string $entityClass
+     * @param non-empty-string $propertyName
+     *
+     * @return class-string
+     */
+    protected function getTargetEntityClass(string $entityClass, string $propertyName, OneToMany|ManyToOne|OneToOne|ManyToMany $annotationOrAttribute): string
+    {
+        $targetEntityClass = $annotationOrAttribute->targetEntity;
+        Assert::notNull($targetEntityClass);
+        if (!interface_exists($targetEntityClass) && !class_exists($targetEntityClass)) {
+            throw new InvalidArgumentException(
+                "Doctrine relationship was defined via annotation/attribute, but the type set as target entity (`$targetEntityClass`) could not be found. Make sure it uses the fully qualified name. The problematic relationship is: `$entityClass::$propertyName`."
+            );
+        }
+
+        return $targetEntityClass;
     }
 }

@@ -34,7 +34,7 @@ class PathClassFromEntityGenerator
      * @param list<ClassOrInterfaceType> $pathClasses
      * @param non-empty-string $targetName
      * @param non-empty-string $targetNamespace
-     * @param callable(ClassOrInterfaceType): string $methodNameCallback
+     * @param callable(ClassOrInterfaceType): non-empty-string $methodNameCallback
      */
     public function generateEntryPointClass(
         array $pathClasses,
@@ -76,11 +76,13 @@ class PathClassFromEntityGenerator
     /**
      * Generate a path class from the given base class.
      *
-     * @param ReflectionClass<object> $reflectionClass
+     * Assumes path classes corresponding to the properties in the given entity class exist in the same namespace.
+     *
+     * @param ReflectionClass<object> $entityClass
      * @param non-empty-string $targetName
      * @param non-empty-string $targetNamespace
      */
-    public function generatePathClass(ReflectionClass $reflectionClass, string $targetName, string $targetNamespace): PhpFile
+    public function generatePathClass(ReflectionClass $entityClass, string $targetName, string $targetNamespace): PhpFile
     {
         $newFile = new PhpFile();
         $newFile->setStrictTypes();
@@ -94,16 +96,33 @@ class PathClassFromEntityGenerator
         $class->addComment("create an extending class and add them there.\n");
 
         $class->addImplement(PropertyAutoPathInterface::class);
+        $namespace->addUse(PropertyAutoPathInterface::class);
         $class->addTrait(PropertyAutoPathTrait::class);
+        $namespace->addUse(PropertyAutoPathTrait::class);
+
+        $entityType = ClassOrInterfaceType::fromFqcn($entityClass->getName());
+        array_map([$namespace, 'addUse'], $entityType->getAllFullyQualifiedNames());
 
         $this->processProperties(
-            $reflectionClass->getProperties(),
+            $entityClass->getProperties(),
             function (
                 ReflectionProperty $property,
                 Column|OneToMany|OneToOne|ManyToOne|ManyToMany $doctrineClass
-            ) use ($class): void {
-                $propertyType = $this->mapToClass($doctrineClass);
-                $class->addComment("@property-read $propertyType \${$property->getName()}");
+            ) use ($class, $targetNamespace, $namespace, $entityType): void {
+                $propertyType = $this->mapToClass($entityType, $doctrineClass, $targetNamespace, $property);
+                $propertyName = $property->getName();
+
+                // add uses
+                $namespace->addUse($propertyType);
+
+                // build reference
+                $reference = $this->buildReference($entityType, $propertyName);
+
+
+                $pathNames = explode('\\', $propertyType);
+                $propertyTypeString = array_pop($pathNames);
+
+                $class->addComment("@property-read $propertyTypeString \$$propertyName $reference");
             }
         );
 
@@ -111,15 +130,19 @@ class PathClassFromEntityGenerator
     }
 
     /**
+     * @param non-empty-string $targetNamespace
+     *
      * @return non-empty-string
      */
-    protected function mapToClass(Column|OneToMany|OneToOne|ManyToOne|ManyToMany $annotationOrAttribute): string
+    protected function mapToClass(ClassOrInterfaceType $entityType, Column|OneToMany|OneToOne|ManyToOne|ManyToMany $annotationOrAttribute, string $targetNamespace, ReflectionProperty $property): string
     {
         if ($annotationOrAttribute instanceof Column) {
             return End::class;
         }
 
-        /** @var OneToMany|OneToOne|ManyToOne|ManyToMany $annotationOrAttribute */
-        return "{$annotationOrAttribute->targetEntity}Path";
+        $targetEntity = $this->getTargetEntityClass($entityType->getFullyQualifiedName(), $property->getName(), $annotationOrAttribute);
+        $relationship = ClassOrInterfaceType::fromFqcn($targetEntity);
+
+        return "$targetNamespace\\{$relationship->getShortClassName()}Path";
     }
 }

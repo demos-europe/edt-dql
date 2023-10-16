@@ -48,7 +48,7 @@ class TypeHolderGenerator
             $parameter = $constructor->addParameter($propertyName);
             $parameter->setType($fullyQualifiedName);
             $constructor->addComment("@param $propertyType");
-            $constructor->addBody("\$this->$propertyName = $propertyName;");
+            $constructor->addBody("\$this->$propertyName = \$$propertyName;");
 
             // add property
             $property = $class->addProperty($propertyName);

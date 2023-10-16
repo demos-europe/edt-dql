@@ -18,7 +18,6 @@ use EDT\PathBuilding\DocblockPropertyByTraitEvaluator;
 use Nette\PhpGenerator\PhpFile;
 use ReflectionClass;
 use ReflectionProperty;
-use Webmozart\Assert\Assert;
 use function array_key_exists;
 
 class ResourceConfigBuilderFromEntityGenerator
@@ -89,8 +88,7 @@ class ResourceConfigBuilderFromEntityGenerator
                 array_map([$namespace, 'addUse'], $targetType->getAllFullyQualifiedNames());
 
                 // build reference
-                $referencedClass = $entityType->getShortClassName();
-                $reference = "{@link $referencedClass::$propertyName}";
+                $reference = $this->buildReference($entityType, $propertyName);
 
                 // add property-read tag
                 $shortString = $targetType->getFullString(true);
@@ -101,7 +99,7 @@ class ResourceConfigBuilderFromEntityGenerator
         return $newFile;
     }
 
-    protected function mapToClass(TypeInterface $entityClass, Column|OneToMany|OneToOne|ManyToOne|ManyToMany $annotationOrAttribute, ReflectionProperty $property): ClassOrInterfaceType
+    protected function mapToClass(ClassOrInterfaceType $entityClass, Column|OneToMany|OneToOne|ManyToOne|ManyToMany $annotationOrAttribute, ReflectionProperty $property): ClassOrInterfaceType
     {
         if ($annotationOrAttribute instanceof Column) {
             $class = AttributeConfigBuilderInterface::class;
@@ -113,13 +111,7 @@ class ResourceConfigBuilderFromEntityGenerator
             ? ToManyRelationshipConfigBuilderInterface::class
             : ToOneRelationshipConfigBuilderInterface::class;
 
-        $targetEntityClass = $annotationOrAttribute->targetEntity;
-        Assert::notNull($targetEntityClass);
-        if (!interface_exists($targetEntityClass) && !class_exists($targetEntityClass)) {
-            throw new \InvalidArgumentException(
-                "Doctrine relationship was defined via annotation/attribute, but the type set as target entity (`$targetEntityClass`) could not be found. Make sure it uses the fully qualified name. The problematic relationship is: `{$entityClass->getFullString(false)}::{$property->getName()}`."
-            );
-        }
+        $targetEntityClass = $this->getTargetEntityClass($entityClass->getFullyQualifiedName(), $property->getName(), $annotationOrAttribute);
 
         $templateParameters = [
             $this->conditionType,

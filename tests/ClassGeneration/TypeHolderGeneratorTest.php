@@ -41,8 +41,8 @@ class Foo
 	 */
 	public function __construct(AuthorType $authorType, BookType $bookType)
 	{
-		$this->authorType = authorType;
-		$this->bookType = bookType;
+		$this->authorType = $authorType;
+		$this->bookType = $bookType;
 	}
 
 
