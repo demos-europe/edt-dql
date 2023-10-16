@@ -37,7 +37,8 @@ trait EntityBasedGeneratorTrait
             $annotations = $this->parseAnnotations($property);
             $attributes = $this->parseAttributes($property);
 
-            Assert::lessThanEq(count($annotations) + count($attributes), 1);
+            $totalCount = count($annotations) + count($attributes);
+            Assert::lessThanEq($totalCount, 1, "Found $totalCount annotation and/or attribute on property `{$property->getName()}`, expected none or one.");
             if ([] !== $annotations) {
                 $used = $annotations;
             } elseif ([] !== $attributes) {
