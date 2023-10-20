@@ -76,7 +76,7 @@ class ResourceConfigBuilderFromEntityGenerator
         );
 
         $this->processProperties(
-            $properties,
+            array_values($properties),
             function (
                 ReflectionProperty $property,
                 Column|OneToMany|OneToOne|ManyToOne|ManyToMany $doctrinePropertySetting
