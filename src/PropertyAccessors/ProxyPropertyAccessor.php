@@ -4,17 +4,52 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\PropertyAccessors;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\Proxy;
 use EDT\Querying\PropertyAccessors\ReflectionPropertyAccessor;
 use ReflectionException;
+use Webmozart\Assert\Assert;
+use function is_array;
 
 class ProxyPropertyAccessor extends ReflectionPropertyAccessor
 {
     public function __construct(
         protected readonly ObjectManager $objectManager
     ) {}
+
+    /**
+     * Sets a property values of the given target.
+     *
+     * When handling to-many relationships they are mostly passed around as `array`. However, the actual to-many
+     * relationship properties in Doctrine entities are of the type {@link Collection}. This implementation will check
+     * if a to-many relationship is to be set to an `array` value and automatically wraps the array inside a
+     * {@link ArrayCollection}.
+     *
+     * @throws ReflectionException
+     */
+    public function setValue(object $target, mixed $value, string $propertyName): void
+    {
+        $targetClass = $this->getClass($target);
+
+        if (is_array($value) && !$this->objectManager->getMetadataFactory()->isTransient($targetClass)) {
+            $metadata = $this->objectManager->getClassMetadata($targetClass);
+            Assert::isInstanceOf($metadata, ClassMetadataInfo::class);
+            $mappingType = $metadata->associationMappings[$propertyName]['type'] ?? null;
+            $isToManyRelationship = match ($mappingType) {
+                ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY => true,
+                default => false
+            };
+            if ($isToManyRelationship) {
+                $value = new ArrayCollection($value);
+            }
+        }
+
+        $reflectionProperty = $this->getReflectionProperty($targetClass, $propertyName);
+        $reflectionProperty->setValue($target, $value);
+    }
 
     /**
      * Will determine the correct class, even if the `$target` is wrapped into a Doctrine {@link Proxy} instance.
