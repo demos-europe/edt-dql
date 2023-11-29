@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace EDT\DqlQuerying\PropertyAccessors;
 
 use Carbon\Carbon;
+use DateTimeInterface;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\Persistence\ObjectManager;
@@ -26,7 +27,7 @@ class Iso8601PropertyAccessor extends ProxyPropertyAccessor
         }
 
         $annotation = $this->annotationReader->getPropertyAnnotation($reflectionProperty, Column::class);
-        if ('datetime' === $annotation?->type) {
+        if ('datetime' === $annotation?->type && $value instanceof DateTimeInterface) {
             $value = Carbon::instance($value)->toIso8601String();
         }
 
