@@ -19,7 +19,7 @@ class Iso8601PropertyAccessor extends ProxyPropertyAccessor
         parent::__construct($objectManager);
     }
 
-    protected function adjustReturnValue(mixed $value, ReflectionProperty $reflectionProperty): ?string
+    protected function adjustReturnValue(mixed $value, ReflectionProperty $reflectionProperty): mixed
     {
         if (null === $value) {
             return $value;
