@@ -13,7 +13,10 @@ use EDT\DqlQuerying\Contracts\OrderByInterface;
 use EDT\Querying\Pagination\OffsetPagination;
 use EDT\Querying\Contracts\OffsetEntityProviderInterface;
 use EDT\Querying\Contracts\PaginationException;
+use InvalidArgumentException;
 use Webmozart\Assert\Assert;
+use function get_class;
+use function is_a;
 
 /**
  * @template TCondition of ClauseInterface
@@ -46,9 +49,15 @@ class DoctrineOrmEntityProvider implements OffsetEntityProviderInterface
         $queryBuilder = $this->generateQueryBuilder($conditions, $sortMethods, $offset, $limit);
         $result = $queryBuilder->getQuery()->getResult();
         Assert::isList($result);
-        Assert::allIsInstanceOf($result, $this->entityClass);
 
-        return $result;
+        return array_map(function (mixed $entity): object {
+            Assert::object($entity);
+            if (!is_a($entity, $this->entityClass, true)) {
+                throw new InvalidArgumentException("Expected `$this->entityClass` instances in Doctrine result only, got `".get_class($entity).'` instead.');
+            }
+
+            return $entity;
+        }, $result);
     }
 
     /**

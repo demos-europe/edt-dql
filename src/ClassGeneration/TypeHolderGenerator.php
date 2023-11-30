@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\ClassGeneration;
 
-use EDT\Parsing\Utilities\ClassOrInterfaceType;
+use EDT\Parsing\Utilities\Types\ClassOrInterfaceType;
 use Nette\PhpGenerator\PhpFile;
 
 class TypeHolderGenerator

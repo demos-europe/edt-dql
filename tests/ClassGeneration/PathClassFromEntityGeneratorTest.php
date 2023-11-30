@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\ClassGeneration;
 
 use EDT\DqlQuerying\ClassGeneration\PathClassFromEntityGenerator;
-use EDT\Parsing\Utilities\NonClassOrInterfaceType;
-use EDT\Parsing\Utilities\ClassOrInterfaceType;
+use EDT\Parsing\Utilities\Types\ClassOrInterfaceType;
+use EDT\Parsing\Utilities\Types\NonClassOrInterfaceType;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
