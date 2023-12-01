@@ -105,7 +105,11 @@ class PathClassFromEntityGenerator
         $namespace->addUse(PropertyAutoPathTrait::class);
 
         $entityType = ClassOrInterfaceType::fromFqcn($entityClass->getName());
-        array_map([$namespace, 'addUse'], $entityType->getAllFullyQualifiedNames());
+
+        // we need to import the corresponding entity class for the property comments only
+        if ($generatePropertyComments) {
+            array_map([$namespace, 'addUse'], $entityType->getAllFullyQualifiedNames());
+        }
 
         $this->processProperties(
             $entityClass->getProperties(),
