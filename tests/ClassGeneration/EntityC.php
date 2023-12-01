@@ -6,7 +6,7 @@ namespace Tests\ClassGeneration;
 
 use Doctrine\ORM\Mapping as ORM;
 
-class EntityC
+class EntityC implements EntityCInterface
 {
     /**
      * @ORM\Column()

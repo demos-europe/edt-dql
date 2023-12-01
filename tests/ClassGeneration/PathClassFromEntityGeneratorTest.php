@@ -119,7 +119,7 @@ class Paths
     {
         $generator = new PathClassFromEntityGenerator();
         $entityAReflectionClass = new ReflectionClass(EntityA::class);
-        $file = $generator->generatePathClass($entityAReflectionClass, 'EntityAPath', 'Foobar');
+        $file = $generator->generatePathClass($entityAReflectionClass, 'EntityAPath', 'Foobar', true);
         self::assertSame(self::ENTITY_A_PATH, (string) $file);
     }
 
@@ -127,7 +127,7 @@ class Paths
     {
         $generator = new PathClassFromEntityGenerator();
         $entityAReflectionClass = new ReflectionClass(EntityC::class);
-        $file = $generator->generatePathClass($entityAReflectionClass, 'EntityCPath', 'Foobar');
+        $file = $generator->generatePathClass($entityAReflectionClass, 'EntityCPath', 'Foobar', true);
         self::assertSame(self::ENTITY_C_PATH, (string) $file);
     }
 

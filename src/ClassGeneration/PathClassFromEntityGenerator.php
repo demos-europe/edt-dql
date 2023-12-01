@@ -82,8 +82,12 @@ class PathClassFromEntityGenerator
      * @param non-empty-string $targetName
      * @param non-empty-string $targetNamespace
      */
-    public function generatePathClass(ReflectionClass $entityClass, string $targetName, string $targetNamespace): PhpFile
-    {
+    public function generatePathClass(
+        ReflectionClass $entityClass,
+        string $targetName,
+        string $targetNamespace,
+        bool $generatePropertyComments
+    ): PhpFile {
         $newFile = new PhpFile();
         $newFile->setStrictTypes();
 
@@ -108,7 +112,7 @@ class PathClassFromEntityGenerator
             function (
                 ReflectionProperty $property,
                 Column|OneToMany|OneToOne|ManyToOne|ManyToMany $doctrineClass
-            ) use ($class, $targetNamespace, $namespace, $entityType): void {
+            ) use ($class, $targetNamespace, $namespace, $entityType, $generatePropertyComments): void {
                 $propertyType = $this->mapToClass($entityType, $doctrineClass, $targetNamespace, $property);
                 $propertyName = $property->getName();
 
@@ -116,13 +120,14 @@ class PathClassFromEntityGenerator
                 $namespace->addUse($propertyType);
 
                 // build reference
-                $reference = $this->buildReference($entityType, $propertyName);
-
+                $reference = $generatePropertyComments
+                    ? ' ' . $this->buildReference($entityType, $propertyName)
+                    : '';
 
                 $pathNames = explode('\\', $propertyType);
                 $propertyTypeString = array_pop($pathNames);
 
-                $class->addComment("@property-read $propertyTypeString \$$propertyName $reference");
+                $class->addComment("@property-read $propertyTypeString \$$propertyName$reference");
             }
         );
 

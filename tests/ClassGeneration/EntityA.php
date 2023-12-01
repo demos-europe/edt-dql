@@ -6,7 +6,7 @@ namespace Tests\ClassGeneration;
 
 use Doctrine\ORM\Mapping as ORM;
 
-class EntityA
+class EntityA implements EntityAInterface
 {
     #[ORM\Column]
     protected $id;

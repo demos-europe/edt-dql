@@ -29,11 +29,17 @@ class ResourceConfigBuilderFromEntityGenerator
      */
     private readonly array $existingProperties;
 
+    /**
+     * @param null|callable(TypeInterface): TypeInterface $entityTypeCallback adjust the entity type to be used in the property type hint
+     * @param null|callable(TypeInterface): TypeInterface $relationshipTypeCallback adjust the relationship type to be used in the property type hint
+     */
     public function __construct(
         protected readonly TypeInterface $conditionType,
         protected readonly TypeInterface $sortingType,
         protected readonly ClassOrInterfaceType $parentClass,
-        protected readonly DocblockPropertyByTraitEvaluator $traitEvaluator
+        protected readonly DocblockPropertyByTraitEvaluator $traitEvaluator,
+        protected readonly mixed $entityTypeCallback = null,
+        protected readonly mixed $relationshipTypeCallback = null
     ) {
         $this->existingProperties = $this->traitEvaluator
             ->parseProperties($this->parentClass->getFullyQualifiedName(), true);
@@ -47,8 +53,9 @@ class ResourceConfigBuilderFromEntityGenerator
      */
     public function generateConfigBuilderClass(
         ClassOrInterfaceType $entityType,
-        string               $targetName,
-        string               $targetNamespace
+        string $targetName,
+        string $targetNamespace,
+        bool $generatePropertyComments
     ): PhpFile {
         $newFile = new PhpFile();
         $newFile->setStrictTypes();
@@ -80,7 +87,7 @@ class ResourceConfigBuilderFromEntityGenerator
             function (
                 ReflectionProperty $property,
                 Column|OneToMany|OneToOne|ManyToOne|ManyToMany $doctrinePropertySetting
-            ) use ($class, $entityType, $namespace): void {
+            ) use ($class, $entityType, $namespace, $generatePropertyComments): void {
                 $targetType = $this->mapToClass($entityType, $doctrinePropertySetting, $property);
                 $propertyName = $property->getName();
 
@@ -88,11 +95,13 @@ class ResourceConfigBuilderFromEntityGenerator
                 array_map([$namespace, 'addUse'], $targetType->getAllFullyQualifiedNames());
 
                 // build reference
-                $reference = $this->buildReference($entityType, $propertyName);
+                $reference = $generatePropertyComments
+                    ? ' ' . $this->buildReference($entityType, $propertyName)
+                    : '';
 
                 // add property-read tag
                 $shortString = $targetType->getFullString(true);
-                $class->addComment("@property-read $shortString \$$propertyName $reference");
+                $class->addComment("@property-read $shortString \$$propertyName$reference");
             }
         );
 
@@ -101,6 +110,11 @@ class ResourceConfigBuilderFromEntityGenerator
 
     protected function mapToClass(ClassOrInterfaceType $entityClass, Column|OneToMany|OneToOne|ManyToOne|ManyToMany $annotationOrAttribute, ReflectionProperty $property): ClassOrInterfaceType
     {
+        $originalEntityClassFqcn = $entityClass->getFullyQualifiedName();
+        if (null !== $this->entityTypeCallback) {
+            $entityClass = ($this->entityTypeCallback)($entityClass);
+        }
+
         if ($annotationOrAttribute instanceof Column) {
             $class = AttributeConfigBuilderInterface::class;
 
@@ -111,14 +125,20 @@ class ResourceConfigBuilderFromEntityGenerator
             ? ToManyRelationshipConfigBuilderInterface::class
             : ToOneRelationshipConfigBuilderInterface::class;
 
-        $targetEntityClass = $this->getTargetEntityClass($entityClass->getFullyQualifiedName(), $property->getName(), $annotationOrAttribute);
+        $targetEntityClass = $this->getTargetEntityClass($originalEntityClassFqcn, $property->getName(), $annotationOrAttribute);
+
+        // TODO: detect template parameters?
+        $targetEntityClass = ClassOrInterfaceType::fromFqcn($targetEntityClass, []);
+        if (null !== $this->relationshipTypeCallback) {
+            $targetEntityClass = ($this->relationshipTypeCallback)($targetEntityClass);
+        }
 
         $templateParameters = [
             $this->conditionType,
             $this->sortingType,
             $entityClass,
             // TODO: parse docblock further to detect types with template parameters
-            ClassOrInterfaceType::fromFqcn($targetEntityClass)
+            $targetEntityClass
         ];
 
         return ClassOrInterfaceType::fromFqcn($class, $templateParameters);
