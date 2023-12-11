@@ -23,8 +23,8 @@ class UpperCase extends AbstractClauseFunction
         );
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases): Func
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): Func
     {
-        return $this->expr->upper($this->getOnlyClause()->asDql($valueReferences, $propertyAliases));
+        return $this->expr->upper($this->getOnlyClause()->asDql($valueReferences, $propertyAliases, $mainEntityAlias));
     }
 }

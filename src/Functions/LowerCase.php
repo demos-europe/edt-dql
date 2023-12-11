@@ -23,8 +23,8 @@ class LowerCase extends AbstractClauseFunction
         );
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases): Func
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): Func
     {
-        return $this->expr->lower($this->getOnlyClause()->asDql($valueReferences, $propertyAliases));
+        return $this->expr->lower($this->getOnlyClause()->asDql($valueReferences, $propertyAliases, $mainEntityAlias));
     }
 }

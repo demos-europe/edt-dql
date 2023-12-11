@@ -26,9 +26,9 @@ class AllEqual extends AbstractClauseFunction
         );
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases): Andx
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): Andx
     {
-        $dqls = $this->getDqls($valueReferences, $propertyAliases);
+        $dqls = $this->getDqls($valueReferences, $propertyAliases, $mainEntityAlias);
 
         $firstDql = array_shift($dqls);
         $eqs = array_map(fn ($dql): Expr\Comparison => $this->expr->eq($firstDql, $dql), $dqls);

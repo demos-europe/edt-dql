@@ -29,11 +29,8 @@ class AllTrue extends AbstractClauseFunction
         );
     }
 
-    /**
-     * @return Andx
-     */
-    public function asDql(array $valueReferences, array $propertyAliases): Andx
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): Andx
     {
-        return new Andx($this->getDqls($valueReferences, $propertyAliases));
+        return new Andx($this->getDqls($valueReferences, $propertyAliases, $mainEntityAlias));
     }
 }

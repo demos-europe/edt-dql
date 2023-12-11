@@ -27,9 +27,9 @@ class BetweenInclusive extends AbstractClauseFunction
     /**
      * @return non-empty-string
      */
-    public function asDql(array $valueReferences, array $propertyAliases): string
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): string
     {
-        [$min, $max, $value] = $this->getDqls($valueReferences, $propertyAliases);
+        [$min, $max, $value] = $this->getDqls($valueReferences, $propertyAliases, $mainEntityAlias);
         $between = $this->expr->between($value, $min, $max);
         Assert::stringNotEmpty($between);
 

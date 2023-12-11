@@ -19,6 +19,7 @@ use EDT\DqlQuerying\Contracts\OrderByInterface;
 use EDT\Querying\Contracts\PropertyPathAccessInterface;
 use EDT\Querying\PropertyPaths\PathInfo;
 use ReflectionException;
+use Webmozart\Assert\Assert;
 use function array_key_exists;
 use function array_slice;
 use function count;
@@ -146,7 +147,7 @@ class QueryBuilderPreparer
         $selectExpressions = array_map([$this, 'processClause'], $this->selections);
         $whereExpressions = array_map([$this, 'processClause'], $this->conditions);
         $orderExpressions = array_map([$this, 'processClause'], $this->sortMethods);
-        $entityAlias = $this->mainClassMetadata->getTableName();
+        $entityAlias = $this->getMainEntityAlias();
 
         // start filling the actual query
 
@@ -212,7 +213,18 @@ class QueryBuilderPreparer
             );
         }, $clause->getPropertyPaths());
 
-        return $clause->asDql($valueIndices, $columnNames);
+        return $clause->asDql($valueIndices, $columnNames, $this->getMainEntityAlias());
+    }
+
+    /**
+     * @return non-empty-string
+     */
+    protected function getMainEntityAlias(): string
+    {
+        $alias = $this->mainClassMetadata->getTableName();
+        Assert::stringNotEmpty($alias);
+
+        return $alias;
     }
 
     /**

@@ -24,9 +24,9 @@ class StringEndsWith extends AbstractClauseFunction
         );
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases): Comparison
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): Comparison
     {
-        [$contains, $contained] = $this->getDqls($valueReferences, $propertyAliases);
+        [$contains, $contained] = $this->getDqls($valueReferences, $propertyAliases, $mainEntityAlias);
         return $this->expr->like($contains, $this->expr->concat('%', $contained));
     }
 }

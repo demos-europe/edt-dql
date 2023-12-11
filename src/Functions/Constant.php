@@ -38,7 +38,7 @@ class Constant extends \EDT\Querying\Functions\Value implements ClauseFunctionIn
     /**
      * @return V
      */
-    public function asDql(array $valueReferences, array $propertyAliases): Composite|Math|Func|Comparison|string
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): Composite|Math|Func|Comparison|string
     {
         Assert::count($valueReferences, 0);
         Assert::count($propertyAliases, 0);

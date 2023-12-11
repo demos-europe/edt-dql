@@ -26,9 +26,9 @@ class IsNull extends AbstractClauseFunction
     /**
      * @return non-empty-string
      */
-    public function asDql(array $valueReferences, array $propertyAliases): string
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): string
     {
-        $maybeNull = $this->getOnlyClause()->asDql($valueReferences, $propertyAliases);
+        $maybeNull = $this->getOnlyClause()->asDql($valueReferences, $propertyAliases, $mainEntityAlias);
         $isNull = $this->expr->isNull($maybeNull);
         Assert::stringNotEmpty($isNull);
 

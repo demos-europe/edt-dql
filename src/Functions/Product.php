@@ -28,9 +28,9 @@ class Product extends AbstractClauseFunction
         );
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases): Composite|Math|Func|Comparison|string
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): Composite|Math|Func|Comparison|string
     {
-        $dqlClauses = $this->getDqls($valueReferences, $propertyAliases);
+        $dqlClauses = $this->getDqls($valueReferences, $propertyAliases, $mainEntityAlias);
         $initial = array_shift($dqlClauses);
         // do not typehint the callback parameters as strings, as we must not implicitly invoke __toString
         return array_reduce($dqlClauses, [$this->expr, 'prod'], $initial);

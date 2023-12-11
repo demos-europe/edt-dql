@@ -20,9 +20,9 @@ class SmallerEquals extends AbstractClauseFunction
         );
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases): Comparison
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): Comparison
     {
-        [$left, $right] = $this->getDqls($valueReferences, $propertyAliases);
+        [$left, $right] = $this->getDqls($valueReferences, $propertyAliases, $mainEntityAlias);
         return $this->expr->lte($left, $right);
     }
 }

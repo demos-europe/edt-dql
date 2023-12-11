@@ -19,7 +19,7 @@ class Value extends \EDT\Querying\Functions\Value implements ClauseFunctionInter
         return [$this->value];
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases): string
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): string
     {
         Assert::count($propertyAliases, 0);
         Assert::count($valueReferences, 1);

@@ -33,9 +33,9 @@ class OneOf extends AbstractClauseFunction
         );
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases): Func
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): Func
     {
-        [$contains, $contained] = $this->getDqls($valueReferences, $propertyAliases);
+        [$contains, $contained] = $this->getDqls($valueReferences, $propertyAliases, $mainEntityAlias);
         return $this->expr->in($contained, $contains);
     }
 }

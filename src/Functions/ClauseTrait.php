@@ -10,6 +10,11 @@ use Webmozart\Assert\Assert;
 trait ClauseTrait
 {
     /**
+     * @var list<ClauseInterface>
+     */
+    protected array $clauses = [];
+
+    /**
      * Can be used if a single clause was passed to {@link AbstractClauseFunction::setClauses()} to
      * get its DQL directly. If not exactly one clause was passed in the setter then this
      * function call will throw an exception.

@@ -23,9 +23,9 @@ class Size extends AbstractClauseFunction
         );
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases): string
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): string
     {
-        $baseDql = $this->getOnlyClause()->asDql($valueReferences, $propertyAliases);
+        $baseDql = $this->getOnlyClause()->asDql($valueReferences, $propertyAliases, $mainEntityAlias);
         return "SIZE($baseDql)";
     }
 }

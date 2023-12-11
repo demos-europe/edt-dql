@@ -24,11 +24,6 @@ abstract class AbstractClauseFunction implements ClauseFunctionInterface
 {
     use ClauseTrait;
 
-    /**
-     * @var list<ClauseInterface>
-     */
-    protected array $clauses = [];
-
     protected Expr $expr;
 
     /**
@@ -74,12 +69,13 @@ abstract class AbstractClauseFunction implements ClauseFunctionInterface
     /**
      * Will return all DQL results of the clauses passed in {@link AbstractClauseFunction::setClauses()}.
      *
+     * @param non-empty-string $mainEntityAlias
      * @param string[] $valueReferences
      * @param string[] $propertyAliases
      *
      * @return list<Comparison|Func|Math|Base|string>
      */
-    protected function getDqls(array $valueReferences, array $propertyAliases): array
+    protected function getDqls(array $valueReferences, array $propertyAliases, string $mainEntityAlias): array
     {
         $nestedValueReferences = $this->unflatClauseReferences(...$valueReferences);
         $nestedPropertyAliases = $this->unflatPropertyAliases(...$propertyAliases);
@@ -88,7 +84,7 @@ abstract class AbstractClauseFunction implements ClauseFunctionInterface
                 ClauseInterface $clause,
                 array $valueReferences,
                 array $propertyAliases
-            ) => $clause->asDql($valueReferences, $propertyAliases),
+            ) => $clause->asDql($valueReferences, $propertyAliases, $mainEntityAlias),
             $this->clauses,
             $nestedValueReferences,
             $nestedPropertyAliases

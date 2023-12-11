@@ -24,11 +24,8 @@ class AnyTrue extends AbstractClauseFunction
         );
     }
 
-    /**
-     * @return Orx
-     */
-    public function asDql(array $valueReferences, array $propertyAliases): Orx
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): Orx
     {
-        return new Orx($this->getDqls($valueReferences, $propertyAliases));
+        return new Orx($this->getDqls($valueReferences, $propertyAliases, $mainEntityAlias));
     }
 }

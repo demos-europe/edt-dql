@@ -25,8 +25,8 @@ class InvertedBoolean extends AbstractClauseFunction
         );
     }
 
-    public function asDql(array $valueReferences, array $propertyAliases): Func
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): Func
     {
-        return $this->expr->not($this->getOnlyClause()->asDql($valueReferences, $propertyAliases));
+        return $this->expr->not($this->getOnlyClause()->asDql($valueReferences, $propertyAliases, $mainEntityAlias));
     }
 }

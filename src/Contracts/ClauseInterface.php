@@ -52,6 +52,7 @@ interface ClauseInterface extends PathsBasedInterface
      *                                  {@link ClauseInterface::getPropertyPaths()} after they have
      *                                  been processed into joins with the values provided here
      *                                  being the entity alias of the destination of the path.
+     * @param non-empty-string $mainEntityAlias the alias of the entity accessed with this condition
      */
-    public function asDql(array $valueReferences, array $propertyAliases): Composite|Math|Func|Comparison|string;
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): Composite|Math|Func|Comparison|string;
 }

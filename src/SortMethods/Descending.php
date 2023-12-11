@@ -21,7 +21,7 @@ class Descending extends \EDT\Querying\SortMethods\Descending implements OrderBy
     /**
      * @return non-empty-string
      */
-    public function asDql(array $valueReferences, array $propertyAliases): string
+    public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): string
     {
         Assert::count($valueReferences, 0);
         Assert::count($propertyAliases, 1);
