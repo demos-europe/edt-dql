@@ -8,30 +8,30 @@ use Doctrine\ORM\Query\Expr\Comparison;
 use Doctrine\ORM\Query\Expr;
 use EDT\DqlQuerying\Contracts\ClauseInterface;
 
-class IsInstanceOfTargetEntity implements ClauseInterface
+class IsTargetEntityInstanceOf implements ClauseInterface
 {
     private Expr $expr;
 
     public function __construct(
-        protected readonly ClauseInterface $valueClause,
+        protected readonly ClauseInterface $typeClause,
     ) {
         $this->expr = new Expr();
     }
 
     public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): Comparison
     {
-        $value = $this->valueClause->asDql($valueReferences, $propertyAliases, $mainEntityAlias);
+        $type = $this->typeClause->asDql($valueReferences, $propertyAliases, $mainEntityAlias);
 
-        return $this->expr->isInstanceOf((string) $value, $mainEntityAlias);
+        return $this->expr->isInstanceOf($mainEntityAlias, (string) $type);
     }
 
     public function getPropertyPaths(): array
     {
-        return $this->valueClause->getPropertyPaths();
+        return $this->typeClause->getPropertyPaths();
     }
 
     public function getClauseValues(): array
     {
-        return $this->valueClause->getClauseValues();
+        return $this->typeClause->getClauseValues();
     }
 }
