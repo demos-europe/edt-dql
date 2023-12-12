@@ -11,6 +11,7 @@ use EDT\DqlQuerying\Functions\AnyTrue;
 use EDT\DqlQuerying\Functions\Greater;
 use EDT\DqlQuerying\Functions\GreaterEquals;
 use EDT\DqlQuerying\Functions\InvertedBoolean;
+use EDT\DqlQuerying\Functions\IsInstanceOf;
 use EDT\DqlQuerying\Functions\Smaller;
 use EDT\DqlQuerying\Functions\SmallerEquals;
 use EDT\DqlQuerying\Functions\StringEndsWith;
@@ -25,6 +26,7 @@ use EDT\DqlQuerying\Functions\LowerCase;
 use EDT\DqlQuerying\Functions\OneOf;
 use EDT\DqlQuerying\Functions\Property;
 use EDT\DqlQuerying\Functions\Size;
+use EDT\DqlQuerying\Functions\TargetEntity;
 use EDT\DqlQuerying\Functions\Value;
 use EDT\ConditionFactory\PathsBasedConditionFactoryInterface;
 use EDT\Querying\Contracts\PathException;
@@ -370,5 +372,24 @@ class DqlConditionFactory implements PathsBasedConditionFactoryInterface, PathsB
         string|array|PropertyPathInterface $properties
     ): PathsBasedInterface {
         return new InvertedBoolean($this->propertyHasStringAsMember($value, $properties));
+    }
+
+    /**
+     * @param class-string $type
+     */
+    public function isTargetEntityInstanceOf(string $type): IsInstanceOf
+    {
+        return new IsInstanceOf(
+            new TargetEntity(),
+            new Value($type)
+        );
+    }
+
+    /**
+     * @param class-string $type
+     */
+    public function isTargetEntityNotInstanceOf(string $type): InvertedBoolean
+    {
+        return new InvertedBoolean($this->isTargetEntityInstanceOf($type));
     }
 }
