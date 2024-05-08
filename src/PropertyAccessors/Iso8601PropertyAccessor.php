@@ -11,6 +11,10 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\Persistence\ObjectManager;
 use ReflectionProperty;
 
+/**
+ * Adjusts the value read from Doctrine `datetime` columns to be ISO 8601 formatted strings.
+ * Otherwise, it has the same capabilities as the parent class.
+ */
 class Iso8601PropertyAccessor extends ProxyPropertyAccessor
 {
     public function __construct(

@@ -104,7 +104,7 @@ abstract class AbstractClauseFunction implements ClauseFunctionInterface
             $this->clauses
         );
 
-        return array_map('array_values', Iterables::split($valueReferences, ...$clauseValueCountables));
+        return array_map('array_values', Iterables::split(array_values($valueReferences), $clauseValueCountables));
     }
 
     /**
@@ -120,6 +120,6 @@ abstract class AbstractClauseFunction implements ClauseFunctionInterface
             $this->clauses
         );
 
-        return array_map('array_values', Iterables::split($propertyAliases, ...$propertyAliasCountables));
+        return array_map('array_values', Iterables::split(array_values($propertyAliases), $propertyAliasCountables));
     }
 }

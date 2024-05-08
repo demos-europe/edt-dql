@@ -14,6 +14,11 @@ use ReflectionException;
 use Webmozart\Assert\Assert;
 use function is_array;
 
+/**
+ * Adds support for Doctrine entities.
+ *
+ * Other limitations of the parent are kept.
+ */
 class ProxyPropertyAccessor extends ReflectionPropertyAccessor
 {
     public function __construct(
