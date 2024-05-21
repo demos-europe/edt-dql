@@ -34,8 +34,6 @@ class ResourceConfigBuilderFromEntityGenerator
      * @param null|callable(TypeInterface): TypeInterface $relationshipTypeCallback adjust the relationship type to be used in the property type hint
      */
     public function __construct(
-        protected readonly TypeInterface $conditionType,
-        protected readonly TypeInterface $sortingType,
         protected readonly ClassOrInterfaceType $parentClass,
         protected readonly DocblockPropertyByTraitEvaluator $traitEvaluator,
         protected readonly mixed $entityTypeCallback = null,
@@ -118,7 +116,7 @@ class ResourceConfigBuilderFromEntityGenerator
         if ($annotationOrAttribute instanceof Column) {
             $class = AttributeConfigBuilderInterface::class;
 
-            return ClassOrInterfaceType::fromFqcn($class, [$this->conditionType, $entityClass]);
+            return ClassOrInterfaceType::fromFqcn($class, [$entityClass]);
         }
 
         $class = $annotationOrAttribute instanceof ManyToMany || $annotationOrAttribute instanceof OneToMany
@@ -134,8 +132,6 @@ class ResourceConfigBuilderFromEntityGenerator
         }
 
         $templateParameters = [
-            $this->conditionType,
-            $this->sortingType,
             $entityClass,
             // TODO: parse docblock further to detect types with template parameters
             $targetEntityClass

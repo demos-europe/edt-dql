@@ -25,11 +25,19 @@ use EDT\DqlQuerying\ObjectProviders\DoctrineOrmEntityProvider;
 use EDT\DqlQuerying\Utilities\JoinFinder;
 use EDT\DqlQuerying\Utilities\QueryBuilderPreparer;
 use EDT\DqlQuerying\SortMethodFactories\SortMethodFactory;
+use EDT\JsonApi\RequestHandling\JsonApiSortingParser;
+use EDT\JsonApi\Validation\SortValidator;
+use EDT\Querying\ConditionParsers\Drupal\DrupalConditionParser;
+use EDT\Querying\ConditionParsers\Drupal\DrupalFilterParser;
+use EDT\Querying\ConditionParsers\Drupal\DrupalFilterValidator;
+use EDT\Querying\ConditionParsers\Drupal\PredefinedDrupalConditionFactory;
 use EDT\Querying\Contracts\PropertyPathAccessInterface;
 use EDT\Querying\PropertyPaths\PropertyPath;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Validator\Validation;
 use Tests\data\DqlModel\Book;
 use Tests\data\DqlModel\Person;
+use Tests\Querying\ConditionParsers\DrupalConditionFactoryTest;
 
 class DoctrineOrmEntityProviderTest extends TestCase
 {
@@ -50,6 +58,10 @@ class DoctrineOrmEntityProviderTest extends TestCase
      * @var DoctrineOrmEntityProvider<ClauseFunctionInterface<bool>, OrderByInterface, Book>
      */
     private DoctrineOrmEntityProvider $bookEntityProvider;
+    private JsonApiSortingParser $sortingTransformer;
+    private SortValidator $sortingValidator;
+    private DrupalFilterValidator $filterValidator;
+    private DrupalFilterParser $filterTransformer;
 
     protected function setUp(): void
     {
@@ -75,6 +87,16 @@ class DoctrineOrmEntityProviderTest extends TestCase
         $joinFinder = new JoinFinder($metadataFactory);
         $bookBuilderPreparer = new QueryBuilderPreparer(Book::class, $metadataFactory, $joinFinder);
         $this->personBuilderPreparer = new QueryBuilderPreparer(Person::class, $metadataFactory, $joinFinder);
+        $predefinedDrupalConditionFactory = new PredefinedDrupalConditionFactory($this->conditionFactory);
+        $validator = Validation::createValidator();
+        $this->filterValidator = new DrupalFilterValidator($validator, $predefinedDrupalConditionFactory);
+        $this->filterTransformer = new DrupalFilterParser(
+            $this->conditionFactory,
+            new DrupalConditionParser($predefinedDrupalConditionFactory),
+            $this->filterValidator
+        );
+        $this->sortingTransformer = new JsonApiSortingParser($this->sortingFactory);
+        $this->sortingValidator = new SortValidator($validator);
         $this->bookEntityProvider = new DoctrineOrmEntityProvider(
             $this->entityManager,
             $bookBuilderPreparer,
