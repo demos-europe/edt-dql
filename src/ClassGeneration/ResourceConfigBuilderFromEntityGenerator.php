@@ -19,7 +19,6 @@ use Nette\PhpGenerator\PhpFile;
 use ReflectionClass;
 use ReflectionProperty;
 use function array_key_exists;
-use Nette\PhpGenerator\PhpNamespace;
 
 class ResourceConfigBuilderFromEntityGenerator
 {
@@ -28,13 +27,15 @@ class ResourceConfigBuilderFromEntityGenerator
     /**
      * @var array<non-empty-string, TypeInterface>
      */
-    protected readonly array $existingProperties;
+    private readonly array $existingProperties;
 
     /**
      * @param null|callable(TypeInterface): TypeInterface $entityTypeCallback adjust the entity type to be used in the property type hint
      * @param null|callable(TypeInterface): TypeInterface $relationshipTypeCallback adjust the relationship type to be used in the property type hint
      */
     public function __construct(
+        protected readonly TypeInterface $conditionType,
+        protected readonly TypeInterface $sortingType,
         protected readonly ClassOrInterfaceType $parentClass,
         protected readonly DocblockPropertyByTraitEvaluator $traitEvaluator,
         protected readonly mixed $entityTypeCallback = null,
@@ -47,13 +48,8 @@ class ResourceConfigBuilderFromEntityGenerator
     /**
      * Generate a config builder class from the given base class.
      *
-     * For each generated property, a comment can be added via the `$generatePropertyComments` parameter.
-     * The comment of the property will contain a reference to the entity property it was based on.
-     * In rare cases you may want to disable the generation of those comments to keep the generated
-     * config class as independent of the entity it is based on as possible.
-     *
      * @param non-empty-string $targetName
-     * @param non-empty-string $targetNamespace TODO: use {@link PhpNamespace} as type instead
+     * @param non-empty-string $targetNamespace
      */
     public function generateConfigBuilderClass(
         ClassOrInterfaceType $entityType,
@@ -81,7 +77,6 @@ class ResourceConfigBuilderFromEntityGenerator
         $class->addComment('');
 
         // skip properties that are already defined in the parent class
-        // TODO: this is intended for something like the `id` property, so that it is only defined once and not in every type, however it may be problematic if something should be overridden, because of a different type  hint
         $properties = array_filter(
             $reflectionClass->getProperties(),
             fn (ReflectionProperty $property): bool => !array_key_exists($property->getName(), $this->existingProperties)
@@ -123,7 +118,7 @@ class ResourceConfigBuilderFromEntityGenerator
         if ($annotationOrAttribute instanceof Column) {
             $class = AttributeConfigBuilderInterface::class;
 
-            return ClassOrInterfaceType::fromFqcn($class, [$entityClass]);
+            return ClassOrInterfaceType::fromFqcn($class, [$this->conditionType, $entityClass]);
         }
 
         $class = $annotationOrAttribute instanceof ManyToMany || $annotationOrAttribute instanceof OneToMany
@@ -132,15 +127,17 @@ class ResourceConfigBuilderFromEntityGenerator
 
         $targetEntityClass = $this->getTargetEntityClass($originalEntityClassFqcn, $property->getName(), $annotationOrAttribute);
 
-        // TODO (#147): detect template parameters?
-        $targetEntityClass = ClassOrInterfaceType::fromFqcn($targetEntityClass);
+        // TODO: detect template parameters?
+        $targetEntityClass = ClassOrInterfaceType::fromFqcn($targetEntityClass, []);
         if (null !== $this->relationshipTypeCallback) {
             $targetEntityClass = ($this->relationshipTypeCallback)($targetEntityClass);
         }
 
         $templateParameters = [
+            $this->conditionType,
+            $this->sortingType,
             $entityClass,
-            // TODO (#147): check docblock further to detect types with template parameters
+            // TODO: parse docblock further to detect types with template parameters
             $targetEntityClass
         ];
 
