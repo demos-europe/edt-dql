@@ -28,8 +28,8 @@ abstract class AbstractTypeFromInterfaceDetector
         Assert::minCount($interfaces, 1, "Found no matching interface for class `$fqcn`.");
         Assert::count($interfaces, 1, "Expected one matching interface for class `$fqcn`, got: ".implode(',', $interfaces));
 
-        // TODO: detect template parameters used for interface
-        return ClassOrInterfaceType::fromFqcn(array_pop($interfaces), []);
+        // TODO (#147): detect template parameters used for interface
+        return ClassOrInterfaceType::fromFqcn(array_pop($interfaces));
     }
 
     /**

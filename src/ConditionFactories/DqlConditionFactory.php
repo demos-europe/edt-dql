@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace EDT\DqlQuerying\ConditionFactories;
 
-use EDT\ConditionFactory\PathsBasedConditionGroupFactoryInterface;
+use EDT\ConditionFactory\ConditionFactoryInterface;
+use EDT\ConditionFactory\ConditionGroupFactoryInterface;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 use EDT\DqlQuerying\Functions\AllTrue;
 use EDT\DqlQuerying\Functions\AnyTrue;
@@ -28,7 +29,6 @@ use EDT\DqlQuerying\Functions\Property;
 use EDT\DqlQuerying\Functions\Size;
 use EDT\DqlQuerying\Functions\TargetEntity;
 use EDT\DqlQuerying\Functions\Value;
-use EDT\ConditionFactory\PathsBasedConditionFactoryInterface;
 use EDT\Querying\Contracts\PathException;
 use EDT\Querying\Contracts\PathsBasedInterface;
 use EDT\Querying\Contracts\PropertyPathAccessInterface;
@@ -37,10 +37,10 @@ use EDT\Querying\PropertyPaths\PropertyPath;
 use function count;
 
 /**
- * @template-implements PathsBasedConditionFactoryInterface<ClauseFunctionInterface<bool>>
- * @template-implements PathsBasedConditionGroupFactoryInterface<ClauseFunctionInterface<bool>>
+ * @template-implements ConditionFactoryInterface<ClauseFunctionInterface<bool>>
+ * @template-implements ConditionGroupFactoryInterface<ClauseFunctionInterface<bool>>
  */
-class DqlConditionFactory implements PathsBasedConditionFactoryInterface, PathsBasedConditionGroupFactoryInterface
+class DqlConditionFactory implements ConditionFactoryInterface, ConditionGroupFactoryInterface
 {
     /**
      * @return ClauseFunctionInterface<bool>
@@ -263,7 +263,7 @@ class DqlConditionFactory implements PathsBasedConditionFactoryInterface, PathsB
      *
      * Because a condition needs all information in a single row, we need to create a separate
      * join for each required value. To clarify this, consider the following tables, continuing
-     * the example in {@link PathsBasedConditionFactoryInterface::allValuesPresentInMemberListProperties()}:
+     * the example in {@link ConditionFactoryInterface::allValuesPresentInMemberListProperties()}:
      *
      * ```
      * author

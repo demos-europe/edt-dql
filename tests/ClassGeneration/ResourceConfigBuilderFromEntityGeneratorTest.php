@@ -25,12 +25,10 @@ declare(strict_types=1);
 
 namespace Foobar;
 
-use EDT\DqlQuerying\Contracts\OrderBySortMethodInterface;
 use EDT\JsonApi\PropertyConfig\Builder\AttributeConfigBuilderInterface;
 use EDT\JsonApi\PropertyConfig\Builder\ToManyRelationshipConfigBuilderInterface;
 use EDT\JsonApi\PropertyConfig\Builder\ToOneRelationshipConfigBuilderInterface;
 use EDT\JsonApi\ResourceConfig\Builder\MagicResourceConfigBuilder;
-use EDT\Querying\Contracts\FunctionInterface;
 use Tests\ClassGeneration\EntityA;
 use Tests\ClassGeneration\EntityB;
 
@@ -41,18 +39,18 @@ use Tests\ClassGeneration\EntityB;
  * To add additional properties, you may want to
  * create an extending class and add them there.
  *
- * @template-extends MagicResourceConfigBuilder<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA>
+ * @template-extends MagicResourceConfigBuilder<EntityA>
  *
- * @property-read AttributeConfigBuilderInterface<FunctionInterface<bool>,EntityA> $propertyA {@link EntityA::propertyA}
- * @property-read ToManyRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyB {@link EntityA::propertyB}
- * @property-read ToManyRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyC {@link EntityA::propertyC}
- * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyD {@link EntityA::propertyD}
- * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyE {@link EntityA::propertyE}
- * @property-read AttributeConfigBuilderInterface<FunctionInterface<bool>,EntityA> $propertyF {@link EntityA::propertyF}
- * @property-read ToManyRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyG {@link EntityA::propertyG}
- * @property-read ToManyRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyH {@link EntityA::propertyH}
- * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyI {@link EntityA::propertyI}
- * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityA,EntityB> $propertyJ {@link EntityA::propertyJ}
+ * @property-read AttributeConfigBuilderInterface<EntityA> $propertyA {@link EntityA::propertyA}
+ * @property-read ToManyRelationshipConfigBuilderInterface<EntityA,EntityB> $propertyB {@link EntityA::propertyB}
+ * @property-read ToManyRelationshipConfigBuilderInterface<EntityA,EntityB> $propertyC {@link EntityA::propertyC}
+ * @property-read ToOneRelationshipConfigBuilderInterface<EntityA,EntityB> $propertyD {@link EntityA::propertyD}
+ * @property-read ToOneRelationshipConfigBuilderInterface<EntityA,EntityB> $propertyE {@link EntityA::propertyE}
+ * @property-read AttributeConfigBuilderInterface<EntityA> $propertyF {@link EntityA::propertyF}
+ * @property-read ToManyRelationshipConfigBuilderInterface<EntityA,EntityB> $propertyG {@link EntityA::propertyG}
+ * @property-read ToManyRelationshipConfigBuilderInterface<EntityA,EntityB> $propertyH {@link EntityA::propertyH}
+ * @property-read ToOneRelationshipConfigBuilderInterface<EntityA,EntityB> $propertyI {@link EntityA::propertyI}
+ * @property-read ToOneRelationshipConfigBuilderInterface<EntityA,EntityB> $propertyJ {@link EntityA::propertyJ}
  */
 class EntityAConfig extends MagicResourceConfigBuilder
 {
@@ -64,12 +62,10 @@ declare(strict_types=1);
 
 namespace Foobar;
 
-use EDT\DqlQuerying\Contracts\OrderBySortMethodInterface;
 use EDT\JsonApi\PropertyConfig\Builder\AttributeConfigBuilderInterface;
 use EDT\JsonApi\PropertyConfig\Builder\ToManyRelationshipConfigBuilderInterface;
 use EDT\JsonApi\PropertyConfig\Builder\ToOneRelationshipConfigBuilderInterface;
 use EDT\JsonApi\ResourceConfig\Builder\MagicResourceConfigBuilder;
-use EDT\Querying\Contracts\FunctionInterface;
 use Tests\ClassGeneration\EntityAInterface;
 use Tests\ClassGeneration\EntityBInterface;
 
@@ -80,18 +76,18 @@ use Tests\ClassGeneration\EntityBInterface;
  * To add additional properties, you may want to
  * create an extending class and add them there.
  *
- * @template-extends MagicResourceConfigBuilder<FunctionInterface<bool>,OrderBySortMethodInterface,EntityAInterface>
+ * @template-extends MagicResourceConfigBuilder<EntityAInterface>
  *
- * @property-read AttributeConfigBuilderInterface<FunctionInterface<bool>,EntityAInterface> $propertyA
- * @property-read ToManyRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityAInterface,EntityBInterface> $propertyB
- * @property-read ToManyRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityAInterface,EntityBInterface> $propertyC
- * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityAInterface,EntityBInterface> $propertyD
- * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityAInterface,EntityBInterface> $propertyE
- * @property-read AttributeConfigBuilderInterface<FunctionInterface<bool>,EntityAInterface> $propertyF
- * @property-read ToManyRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityAInterface,EntityBInterface> $propertyG
- * @property-read ToManyRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityAInterface,EntityBInterface> $propertyH
- * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityAInterface,EntityBInterface> $propertyI
- * @property-read ToOneRelationshipConfigBuilderInterface<FunctionInterface<bool>,OrderBySortMethodInterface,EntityAInterface,EntityBInterface> $propertyJ
+ * @property-read AttributeConfigBuilderInterface<EntityAInterface> $propertyA
+ * @property-read ToManyRelationshipConfigBuilderInterface<EntityAInterface,EntityBInterface> $propertyB
+ * @property-read ToManyRelationshipConfigBuilderInterface<EntityAInterface,EntityBInterface> $propertyC
+ * @property-read ToOneRelationshipConfigBuilderInterface<EntityAInterface,EntityBInterface> $propertyD
+ * @property-read ToOneRelationshipConfigBuilderInterface<EntityAInterface,EntityBInterface> $propertyE
+ * @property-read AttributeConfigBuilderInterface<EntityAInterface> $propertyF
+ * @property-read ToManyRelationshipConfigBuilderInterface<EntityAInterface,EntityBInterface> $propertyG
+ * @property-read ToManyRelationshipConfigBuilderInterface<EntityAInterface,EntityBInterface> $propertyH
+ * @property-read ToOneRelationshipConfigBuilderInterface<EntityAInterface,EntityBInterface> $propertyI
+ * @property-read ToOneRelationshipConfigBuilderInterface<EntityAInterface,EntityBInterface> $propertyJ
  */
 class EntityAConfig extends MagicResourceConfigBuilder
 {
@@ -100,16 +96,8 @@ class EntityAConfig extends MagicResourceConfigBuilder
 
     public function testGenerateConfigBuilderClass(): void
     {
-        $conditionClass = ClassOrInterfaceType::fromFqcn(
-            FunctionInterface::class,
-            [NonClassOrInterfaceType::fromRawString('bool')]
-        );
-        $sortingClass = ClassOrInterfaceType::fromFqcn(OrderBySortMethodInterface::class);
         $entityClass = ClassOrInterfaceType::fromFqcn(EntityA::class);
-        $parentClass = ClassOrInterfaceType::fromFqcn(
-            MagicResourceConfigBuilder::class,
-            [$conditionClass, $sortingClass, $entityClass]
-        );
+        $parentClass = ClassOrInterfaceType::fromFqcn(MagicResourceConfigBuilder::class, [$entityClass]);
 
         $traitEvaluator = new DocblockPropertyByTraitEvaluator(
             new TraitEvaluator(),
@@ -117,12 +105,7 @@ class EntityAConfig extends MagicResourceConfigBuilder
             [PropertyTag::PROPERTY_READ]
         );
 
-        $generator = new ResourceConfigBuilderFromEntityGenerator(
-            $conditionClass,
-            $sortingClass,
-            $parentClass,
-            $traitEvaluator
-        );
+        $generator = new ResourceConfigBuilderFromEntityGenerator($parentClass, $traitEvaluator);
 
         $file = $generator->generateConfigBuilderClass(
             $entityClass,
@@ -136,17 +119,9 @@ class EntityAConfig extends MagicResourceConfigBuilder
 
     public function testGenerateConfigBuilderClassWithInterfaces(): void
     {
-        $conditionClass = ClassOrInterfaceType::fromFqcn(
-            FunctionInterface::class,
-            [NonClassOrInterfaceType::fromRawString('bool')]
-        );
-        $sortingClass = ClassOrInterfaceType::fromFqcn(OrderBySortMethodInterface::class);
         $entityClass = ClassOrInterfaceType::fromFqcn(EntityA::class);
         $interfaceClass = ClassOrInterfaceType::fromFqcn(EntityAInterface::class);
-        $parentClass = ClassOrInterfaceType::fromFqcn(
-            MagicResourceConfigBuilder::class,
-            [$conditionClass, $sortingClass, $interfaceClass]
-        );
+        $parentClass = ClassOrInterfaceType::fromFqcn(MagicResourceConfigBuilder::class, [$interfaceClass]);
 
         $traitEvaluator = new DocblockPropertyByTraitEvaluator(
             new TraitEvaluator(),
@@ -162,8 +137,6 @@ class EntityAConfig extends MagicResourceConfigBuilder
         };
 
         $generator = new ResourceConfigBuilderFromEntityGenerator(
-            $conditionClass,
-            $sortingClass,
             $parentClass,
             $traitEvaluator,
             $parentDetector,
