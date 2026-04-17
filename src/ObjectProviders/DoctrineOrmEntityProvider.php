@@ -19,9 +19,11 @@ use function get_class;
 use function is_a;
 
 /**
+ * @template TCondition of ClauseInterface
+ * @template TSorting of OrderByInterface
  * @template TEntity of object
  *
- * @template-implements OffsetEntityProviderInterface<ClauseInterface, OrderByInterface, TEntity>
+ * @template-implements OffsetEntityProviderInterface<TCondition, TSorting, TEntity>
  */
 class DoctrineOrmEntityProvider implements OffsetEntityProviderInterface
 {

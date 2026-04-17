@@ -39,6 +39,7 @@ trait EntityBasedGeneratorTrait
             $attributes = $this->parseAttributes($property);
 
             // remove redundant annotations
+            // TODO: O(n*m)
             $annotations = array_filter(
                 $annotations,
                 function (Column|OneToMany|OneToOne|ManyToOne|ManyToMany $annotation) use ($attributes): bool {
