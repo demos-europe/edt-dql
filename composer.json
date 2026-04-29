@@ -6,8 +6,8 @@
     "require": {
         "doctrine/orm": "^2.5 || ^3.0",
         "php": "^8.1",
-        "demos-europe/edt-queries": "^0.27",
-        "demos-europe/edt-paths": "^0.27",
+        "demos-europe/edt-queries": "dev-f-DPLAN-17129-doctrine-orm-v3-support",
+        "demos-europe/edt-paths": "dev-f-DPLAN-17129-doctrine-orm-v3-support",
         "nette/php-generator": "^4.0",
         "symfony/cache": "^5 || ^6 || ^7"
     },
