@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace EDT\DqlQuerying\Utilities;
 
 use Doctrine\ORM\Mapping\ClassMetadataFactory;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query\Expr\Composite;
 use Doctrine\ORM\Query\Expr\Math;
 use EDT\DqlQuerying\Contracts\ClauseInterface;
@@ -60,9 +60,9 @@ class QueryBuilderPreparer
      * Provides all needed information to choose the correct entity type and mappings to translate
      * the group into DQL data.
      *
-     * @var ClassMetadataInfo<object>
+     * @var ClassMetadata<object>
      */
-    private ClassMetadataInfo $mainClassMetadata;
+    private ClassMetadata $mainClassMetadata;
 
     /**
      * @var list<ClauseInterface>
@@ -154,13 +154,14 @@ class QueryBuilderPreparer
         // set `SELECT`s
         if ([] === $selectExpressions) {
             $queryBuilder->select($entityAlias);
+        } else {
+            $selectExpressions = array_map(
+                static fn ($expression, string $alias): string => "$expression AS $alias",
+                $selectExpressions,
+                array_keys($selectExpressions)
+            );
+            $queryBuilder->addSelect($selectExpressions);
         }
-        $selectExpressions = array_map(
-            static fn ($expression, string $alias): string => "$expression AS $alias",
-            $selectExpressions,
-            array_keys($selectExpressions)
-        );
-        $queryBuilder->addSelect($selectExpressions);
 
         // set `FROM`s
         $queryBuilder->from($this->mainClassMetadata->getName(), $entityAlias);
@@ -181,7 +182,9 @@ class QueryBuilderPreparer
         array_map([$queryBuilder, 'addOrderBy'], $orderings);
 
         // set parameters
-        $queryBuilder->setParameters($this->parameters);
+        foreach ($this->parameters as $index => $value) {
+            $queryBuilder->setParameter($index, $value);
+        }
 
         $this->resetTemporaryState();
     }

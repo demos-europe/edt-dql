@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace EDT\DqlQuerying\Utilities;
 
 use Doctrine\ORM\Mapping\ClassMetadataFactory;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\MappingException as OrmMappingException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\Mapping\MappingException as PersistenceMappingException;
@@ -44,7 +44,7 @@ class JoinFinder
      * different paths:
      * * `t_58fb870d_Person` in case of a join to the `authors` of a `Book` entity
      *
-     * @param ClassMetadataInfo<object> $classMetadata
+     * @param ClassMetadata<object> $classMetadata
      * @param list<non-empty-string> $path
      *
      * @return array<non-empty-string, Join> The needed joins. The key will be the alias of
@@ -55,7 +55,7 @@ class JoinFinder
      *                       of returned joins is equal to the length of the provided path.
      * @throws MappingException
      */
-    public function findNecessaryJoins(bool $toManyAllowed, string $salt, ClassMetadataInfo $classMetadata, array $path, string $tableAlias): array
+    public function findNecessaryJoins(bool $toManyAllowed, string $salt, ClassMetadata $classMetadata, array $path, string $tableAlias): array
     {
         if ([] === $path) {
             return [];
@@ -79,7 +79,7 @@ class JoinFinder
      * @param string $pathSalt will be used when generating the tables aliases to distinguish the
      *                         segments in this path from segments in other paths that use the same
      *                         table name
-     * @param ClassMetadataInfo<object> $classMetadata
+     * @param ClassMetadata<object> $classMetadata
      * @param non-empty-string $pathPart
      * @param non-empty-string ...$morePathParts
      *
@@ -90,7 +90,7 @@ class JoinFinder
     protected function findJoinsRecursive(
         bool $toManyAllowed,
         string $pathSalt,
-        ClassMetadataInfo $classMetadata,
+        ClassMetadata $classMetadata,
         string $tableAlias,
         string $pathPart,
         string ...$morePathParts
@@ -147,30 +147,30 @@ class JoinFinder
      * The prefixing allows to distinguish multiple usages of the same table in different contextes,
      * e.g. different paths or separate `from` clauses.
      *
-     * @param ClassMetadataInfo<object> $tableInfo
+     * @param ClassMetadata<object> $tableInfo
      *
      * @return non-empty-string
      */
-    public function createTableAlias(string $prefix, ClassMetadataInfo $tableInfo): string
+    public function createTableAlias(string $prefix, ClassMetadata $tableInfo): string
     {
         return "t_{$prefix}_{$tableInfo->getTableName()}";
     }
 
     /**
-     * @param ClassMetadataInfo<object> $metadata
+     * @param ClassMetadata<object> $metadata
      *
-     * @return ClassMetadataInfo<object>
+     * @return ClassMetadata<object>
      *
      * @throws MappingException
      */
-    protected function getTargetClassMetadata(string $relationshipName, ClassMetadataInfo $metadata): ClassMetadataInfo
+    protected function getTargetClassMetadata(string $relationshipName, ClassMetadata $metadata): ClassMetadata
     {
         try {
             $entityClass = $metadata->getAssociationTargetClass($relationshipName);
             $classMetadata = $this->metadataFactory->getMetadataFor($entityClass);
-            if (!$classMetadata instanceof ClassMetadataInfo) {
+            if (!$classMetadata instanceof ClassMetadata) {
                 $type = get_class($classMetadata);
-                throw new InvalidArgumentException("Expected ClassMetadataInfo, got $type");
+                throw new InvalidArgumentException("Expected ClassMetadata, got $type");
             }
 
             return $classMetadata;
@@ -180,31 +180,29 @@ class JoinFinder
     }
 
     /**
-     * @param ClassMetadataInfo<object> $classMetadata
+     * @param ClassMetadata<object> $classMetadata
      *
      * @throws OrmMappingException
      */
-    protected function isToManyRelationship(ClassMetadataInfo $classMetadata, string $property): bool
+    protected function isToManyRelationship(ClassMetadata $classMetadata, string $property): bool
     {
-        $mapping = $classMetadata->getAssociationMapping($property);
-
-        return (bool) ($mapping['type'] & ClassMetadataInfo::TO_MANY);
+        return $classMetadata->isCollectionValuedAssociation($property);
     }
 
     /**
-     * @param ClassMetadataInfo<object> $classMetadata
+     * @param ClassMetadata<object> $classMetadata
      * @param non-empty-string $property
      */
-    protected function isRelationship(ClassMetadataInfo $classMetadata, string $property): bool
+    protected function isRelationship(ClassMetadata $classMetadata, string $property): bool
     {
         return $classMetadata->hasAssociation($property);
     }
 
     /**
-     * @param ClassMetadataInfo<object> $classMetadata
+     * @param ClassMetadata<object> $classMetadata
      * @param non-empty-string $property
      */
-    protected function isAttribute(ClassMetadataInfo $classMetadata, string $property): bool
+    protected function isAttribute(ClassMetadata $classMetadata, string $property): bool
     {
         return $classMetadata->hasField($property);
     }

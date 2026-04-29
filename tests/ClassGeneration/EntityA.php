@@ -26,31 +26,6 @@ class EntityA implements EntityAInterface
     #[ORM\OneToOne(targetEntity: EntityB::class)]
     protected $propertyE;
 
-    /**
-     * @ORM\Column
-     */
-    protected $propertyF;
-
-    /**
-     * @ORM\ManyToMany(targetEntity=EntityB::class)
-     */
-    protected $propertyG;
-
-    /**
-     * @ORM\OneToMany(targetEntity=EntityB::class)
-     */
-    protected $propertyH;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=EntityB::class)
-     */
-    protected $propertyI;
-
-    /**
-     * @ORM\OneToOne(targetEntity=EntityB::class)
-     */
-    protected $propertyJ;
-
     protected $propertyK;
 
     public function getName(): string

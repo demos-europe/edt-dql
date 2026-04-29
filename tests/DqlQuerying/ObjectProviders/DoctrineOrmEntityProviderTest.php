@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Tests\DqlQuerying\ObjectProviders;
 
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Mapping\Driver\AttributeDriver;
+use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Query\Parameter;
-use Doctrine\ORM\Tools\Setup;
 use EDT\DqlQuerying\ConditionFactories\DqlConditionFactory;
 use EDT\DqlQuerying\Contracts\ClauseFunctionInterface;
 use EDT\DqlQuerying\Contracts\MappingException;
@@ -54,21 +54,13 @@ class DoctrineOrmEntityProviderTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $config = Setup::createAnnotationMetadataConfiguration(
-            [__DIR__.'/tests/data/Model'],
-            true,
-            null,
-            null,
-            false
-        );
         $paths = [__DIR__.'/tests/data/Model'];
-        $driver = new AttributeDriver($paths);
-        $config->setMetadataDriverImpl($driver);
-        $conn = [
+        $config = ORMSetup::createAttributeMetadataConfiguration($paths, true);
+        $connection = DriverManager::getConnection([
             'driver' => 'pdo_sqlite',
             'path' => __DIR__ . '/db.sqlite',
-        ];
-        $this->entityManager = EntityManager::create($conn, $config);
+        ], $config);
+        $this->entityManager = new EntityManager($connection, $config);
         $this->conditionFactory = new DqlConditionFactory();
         $this->sortingFactory = new SortMethodFactory();
         $metadataFactory = $this->entityManager->getMetadataFactory();

@@ -6,9 +6,6 @@ namespace EDT\DqlQuerying\PropertyAccessors;
 
 use Carbon\Carbon;
 use DateTimeInterface;
-use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\ORM\Mapping\Column;
-use Doctrine\Persistence\ObjectManager;
 use ReflectionProperty;
 
 /**
@@ -17,22 +14,18 @@ use ReflectionProperty;
  */
 class Iso8601PropertyAccessor extends ProxyPropertyAccessor
 {
-    public function __construct(
-        ObjectManager $objectManager,
-        protected readonly AnnotationReader $annotationReader = new AnnotationReader()
-    ) {
-        parent::__construct($objectManager);
-    }
-
     protected function adjustReturnValue(mixed $value, ReflectionProperty $reflectionProperty): mixed
     {
-        if (null === $value) {
+        if (!$value instanceof DateTimeInterface) {
             return $value;
         }
 
-        $annotation = $this->annotationReader->getPropertyAnnotation($reflectionProperty, Column::class);
-        if ('datetime' === $annotation?->type && $value instanceof DateTimeInterface) {
-            $value = Carbon::instance($value)->toIso8601String();
+        $declaringClass = $reflectionProperty->getDeclaringClass()->getName();
+        $propertyName = $reflectionProperty->getName();
+        $metadata = $this->objectManager->getClassMetadata($declaringClass);
+
+        if ($metadata->hasField($propertyName) && 'datetime' === $metadata->getTypeOfField($propertyName)) {
+            return Carbon::instance($value)->toIso8601String();
         }
 
         return $value;

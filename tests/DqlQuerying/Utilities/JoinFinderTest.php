@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\DqlQuerying\Utilities;
 
+use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Mapping\Driver\AttributeDriver;
+use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Query\Expr\Join;
-use Doctrine\ORM\Tools\Setup;
 use EDT\DqlQuerying\Contracts\MappingException;
 use EDT\DqlQuerying\Utilities\JoinFinder;
 use InvalidArgumentException;
@@ -27,21 +27,13 @@ class JoinFinderTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $config = Setup::createAnnotationMetadataConfiguration(
-            [__DIR__.'/tests/Model'],
-            true,
-            null,
-            null,
-            false
-        );
         $paths = [__DIR__.'/tests/Model'];
-        $driver = new AttributeDriver($paths);
-        $config->setMetadataDriverImpl($driver);
-        $conn = [
+        $config = ORMSetup::createAttributeMetadataConfiguration($paths, true);
+        $connection = DriverManager::getConnection([
             'driver' => 'pdo_sqlite',
             'path' => __DIR__ . '/db.sqlite',
-        ];
-        $entityManager = EntityManager::create($conn, $config);
+        ], $config);
+        $entityManager = new EntityManager($connection, $config);
         $this->bookMetadata = $entityManager->getClassMetadata(Book::class);
         $this->personMetadata = $entityManager->getClassMetadata(Person::class);
         $this->joinFinder = new JoinFinder($entityManager->getMetadataFactory());

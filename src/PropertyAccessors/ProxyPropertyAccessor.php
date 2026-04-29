@@ -6,7 +6,7 @@ namespace EDT\DqlQuerying\PropertyAccessors;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\Proxy;
 use EDT\Querying\PropertyAccessors\ReflectionPropertyAccessor;
@@ -41,13 +41,8 @@ class ProxyPropertyAccessor extends ReflectionPropertyAccessor
 
         if (is_array($value) && !$this->objectManager->getMetadataFactory()->isTransient($targetClass)) {
             $metadata = $this->objectManager->getClassMetadata($targetClass);
-            Assert::isInstanceOf($metadata, ClassMetadataInfo::class);
-            $mappingType = $metadata->associationMappings[$propertyName]['type'] ?? null;
-            $isToManyRelationship = match ($mappingType) {
-                ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY => true,
-                default => false
-            };
-            if ($isToManyRelationship) {
+            Assert::isInstanceOf($metadata, ClassMetadata::class);
+            if ($metadata->hasAssociation($propertyName) && $metadata->isCollectionValuedAssociation($propertyName)) {
                 $value = new ArrayCollection($value);
             }
         }
@@ -71,7 +66,7 @@ class ProxyPropertyAccessor extends ReflectionPropertyAccessor
             $target->__load();
             // If the instance is wrapped in a proxy we need to get the actual class name out of it
             $classMetadata = $this->objectManager->getClassMetadata($class);
-            if (!$classMetadata instanceof ClassMetadataInfo) {
+            if (!$classMetadata instanceof ClassMetadata) {
                 $metadataClass = $classMetadata::class;
                 throw new ReflectionException("Unable to determine actual class of target for reflection access. Target is a doctrine proxy object but the corresponding metadata class ($metadataClass) did not the necessary 'rootEntityName' field.");
             }

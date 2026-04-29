@@ -27,6 +27,6 @@ class StringContains extends AbstractClauseFunction
     public function asDql(array $valueReferences, array $propertyAliases, string $mainEntityAlias): Comparison
     {
         [$contains, $contained] = $this->getDqls($valueReferences, $propertyAliases, $mainEntityAlias);
-        return $this->expr->like($contains, $this->expr->concat("'%'", $contained, "'%'"));
+        return $this->expr->like((string) $contains, (string) $this->expr->concat("'%'", $contained, "'%'"));
     }
 }
